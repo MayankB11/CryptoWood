@@ -64,7 +64,7 @@
         let currentAccount = null;
         let web3;
         let abi;
-        let contractTokenAddress = '0xecB1681Dc07b17bC75f93c3c7B857FB1cF9A9030'
+        let contractTokenAddress = '0xA8337c9EdBeF1885cf6Dee4C4951e60cB93C426F'
         let contractMarketAddress = '0x60122f204B150bAD7b67f467C918d4eDfF26181E'
         
         function handleAccountsChanged(accounts) {
@@ -204,7 +204,7 @@
             ////////////////////////////////////////////////////////////////////
 
 
-            contractMarket.methods.setContentTokenAddress('0x33316F49288C8dDEb13afc2CA22870f30813330D')
+            contractMarket.methods.setContentTokenAddress(contractTokenAddress)
             .send({from:ethereum.selectedAddress})
             .then(function (result) {
                 console.log(result);
@@ -213,13 +213,14 @@
 
 
             contractToken.methods.addNewToken(10, 100000000000)
-            .send({from:ethereum.selectedAddress, gas: '0x21000'})
+            .send({from:ethereum.selectedAddress})
             .then(function (result) {
                 console.log(result);
                 //$('#getValue').html(input_value)
+                getValue()
             });
 
-            getValue()
+            
 
         }
     </script>

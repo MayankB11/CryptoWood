@@ -15,13 +15,13 @@ abi = truffleFile['abi']
 bytecode = truffleFile['bytecode']
 contract= w3.eth.contract(bytecode=bytecode, abi=abi)
 
-mkt = '0x5fD36D7B7b529B808BC5D1a16B4C5368b888A330'
+mkt = '0x60122f204B150bAD7b67f467C918d4eDfF26181E'
 
 #building transaction
 construct_txn = contract.constructor(acct.address, mkt).buildTransaction({
     'from': acct.address,
     'nonce': w3.eth.getTransactionCount(acct.address),
-    'gas': 1728712,
+    'gas': 5728712,
     'gasPrice': w3.toWei('20', 'gwei')})
 
 
