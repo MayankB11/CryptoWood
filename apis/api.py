@@ -1,9 +1,11 @@
+import uuid
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 
 from flask import Flask, request, jsonify
 import requests
+import json
 
 app = Flask(__name__)
 
@@ -26,19 +28,21 @@ def beforeRequest():
 @app.route('/storeDetails/', methods=['POST'])
 def storeDetails():
 	data = request.get_json()
-	if "private_link_id" in data and "url" in data and "title" in data and "owner_address" in data:
+	if "url" in data and "title" in data and "owner_address" in data and "num_tokens" in data:
 		url = data["url"]
-		private_link_id = data["private_link_id"]
+		private_link_id = uuid.uuid1().hex
 		title = data["title"]
 		owner_address = data["owner_address"]
+		num_tokens = data["num_tokens"]
 		post_data = {
 			"private_link_id" :private_link_id, 
 			"title" : title,
 			"url" : url,
-			"owner_address" : owner_address		
+			"owner_address" : owner_address,
+			"num_tokens" : num_tokens
 		}
 		ref.push(post_data)
-		return post_data
+		return private_link_id
 	else:
 		return "Either of the field(s) is/are empty in the request",400
 
@@ -54,6 +58,10 @@ def createGatedAccess():
 				url = value["url"]
 				title = value["title"]
 				owner_address = value["owner_address"]
+				headers = {
+				    'accept': 'application/json',
+				    'Content-Type': 'application/json',
+				}
 				mintgate_params = {
 					"url": url,
 					"title": title,
@@ -73,9 +81,9 @@ def createGatedAccess():
 					"brand": 0
 				}
 				print("Mintgate Request : ", request)
-				response = requests.post('https://httpbin.org/post', data = mintgate_params)
+				response = requests.post('http://mgate.io/api/v2/links/create', headers = headers, json = mintgate_params)
 				print("Mintgate Response : ", response.text)
-				return response.text
+				return response.json()
 		return "Either access to db failed or private_link_id not found on DB",400
 	else:
 		return "Either token id or private link id field is empty in the request",400
