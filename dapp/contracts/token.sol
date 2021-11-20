@@ -9,9 +9,15 @@ contract ContentToken is ERC1155 {
     address public marketPlace;
     uint256 public totalTypesOfTokens;
     
-    mapping(uint256 => address) tokenCreator;
-    mapping(uint256 => string) gatedURLs;
-    mapping(uint256 => uint256) tokenPrice;
+    struct TokenInfo{
+        address creator;
+        string gatedURL;
+        uint256 tokenPrice;
+        bool isContentToken;
+    }
+    
+    mapping(address => uint256) creatorTokenMapping;
+    mapping(uint256 => TokenInfo) tokenInfos;
     
     modifier onlyOwner() {
         require(msg.sender == owner, "only owner can call this");
@@ -19,7 +25,7 @@ contract ContentToken is ERC1155 {
     }
     
     modifier onlyCreator(uint256 tokenId){
-        require(msg.sender == tokenCreator[tokenId], "only creator can call this");
+        require(msg.sender == tokenInfos[tokenId].creator, "only creator can call this");
         _;
     }
     
@@ -34,25 +40,38 @@ contract ContentToken is ERC1155 {
         totalTypesOfTokens = 0;
     }
     
-    function addNewToken(uint256 initialSupply, uint256 price) public {
+    function addNewToken(uint256 initialSupply, uint256 price) public returns (uint256){
+        
+        if (creatorTokenMapping[msg.sender] == 0){
+            totalTypesOfTokens++;
+            uint256 tokenId = totalTypesOfTokens;
+            tokenInfos[tokenId].creator = msg.sender;
+            tokenInfos[tokenId].tokenPrice = 100;
+            tokenInfos[tokenId].isContentToken = false;
+            _mint(msg.sender, tokenId, 100000000000, "");
+        }
+        
         totalTypesOfTokens++;
         uint256 tokenId = totalTypesOfTokens;
-        tokenCreator[tokenId] = msg.sender;
-        tokenPrice[tokenId] = price;
+        tokenInfos[tokenId].creator = msg.sender;
+        tokenInfos[tokenId].tokenPrice = price;
+        tokenInfos[tokenId].isContentToken = true;
 
         _mint(msg.sender, tokenId, initialSupply, "");
         setApprovalForAll(marketPlace, true);
+        
+        return tokenId;
 
         // ChainLink Call
         // -- mintgate connection (Custom API call){tokenID, private-link-id}
     }
     
     function setGatedURI(uint256 tokenID, string memory uri) public onlyOwner{
-        gatedURLs[tokenID] = uri;
+        tokenInfos[tokenID].gatedURL = uri;
     }
     
     function getGatedURI(uint256 tokenID) public view returns(string memory){
-        return gatedURLs[tokenID];
+        return tokenInfos[tokenID].gatedURL;
     }
     
     function addMoreSupply(uint256 tokenID, uint256 additionalSupply) public onlyCreator(tokenID){
@@ -60,8 +79,8 @@ contract ContentToken is ERC1155 {
     }
     
     function getTokenPriceAndCreator(uint256 tokenID) external view returns(uint256, address){
-        require (tokenPrice[tokenID] > 0, "Token does not exist");
-        return (tokenPrice[tokenID], tokenCreator[tokenID]);
+        require (tokenInfos[tokenID].tokenPrice > 0, "Token does not exist");
+        return (tokenInfos[tokenID].tokenPrice, tokenInfos[tokenID].creator);
     }
     
     function setApprovalForMarketPlace() public{
