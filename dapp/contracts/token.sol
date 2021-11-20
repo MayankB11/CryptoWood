@@ -37,6 +37,9 @@ contract ContentToken is ERC1155 {
 
         _mint(msg.sender, tokenId, initialSupply, "");
         setApprovalForAll(marketPlace, true);
+
+        // ChainLink Call
+        // -- mintgate connection (Custom API call){tokenID, private-link-id}
     }
     
     function setGatedURI(uint256 tokenID, string memory uri) public onlyOwner{
