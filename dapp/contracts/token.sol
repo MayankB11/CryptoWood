@@ -48,6 +48,7 @@ contract ContentToken is ERC1155 {
             tokenInfos[tokenId].creator = msg.sender;
             tokenInfos[tokenId].tokenPrice = 100;
             tokenInfos[tokenId].isContentToken = false;
+            creatorTokenMapping[msg.sender] = tokenId;
             _mint(msg.sender, tokenId, 100000000000, "");
         }
         
