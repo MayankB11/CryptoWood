@@ -6,8 +6,13 @@ from firebase_admin import db
 from flask import Flask, request, jsonify
 import requests
 import json
+from flask import logging
+
+from flask_cors import CORS, cross_origin
+import json
 
 app = Flask(__name__)
+CORS(app, send_wildcard=True)
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('./serviceAccountKey.json')
@@ -27,7 +32,8 @@ def beforeRequest():
 
 @app.route('/storeDetails/', methods=['POST'])
 def storeDetails():
-	data = request.get_json()
+	data = request.get_json(force=True)
+	print (data)
 	if "url" in data and "title" in data and "owner_address" in data and "num_tokens" in data:
 		url = data["url"]
 		private_link_id = uuid.uuid1().hex
@@ -89,4 +95,4 @@ def createGatedAccess():
 		return "Either token id or private link id field is empty in the request",400
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=8000)
+	app.run(host='0.0.0.0', port=5000)
