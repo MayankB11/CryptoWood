@@ -13,7 +13,11 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 import requests
 import json
+from flask import logging
 
+import json
+
+CORS(app, send_wildcard=True)
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('./serviceAccountKey.json')
@@ -39,7 +43,8 @@ def after_request(response):
 
 @app.route('/storeDetails/', methods=['POST'])
 def storeDetails():
-	data = request.get_json()
+	data = request.get_json(force=True)
+	print (data)
 	if "url" in data and "title" in data and "owner_address" in data and "num_tokens" in data:
 		url = data["url"]
 		private_link_id = uuid.uuid1().hex

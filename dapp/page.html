@@ -89,12 +89,12 @@
                 $('#enableMetamask').html('Connect with Metamask')
             } else if (accounts[0] !== currentAccount) {
                 currentAccount = accounts[0];
-                $('#enableMetamask').html(currentAccount)
+                $('#enableMetamask').html('Connected Metamask Wallet: ' + currentAccount)
                 $('#status').html('')
                 
                 if(currentAccount != null) {
                     // Set the button label
-                    $('#enableMetamask').html(currentAccount)
+                    $('#enableMetamask').html('Connected Metamask Wallet: ' + currentAccount)
                 }
             }
             console.log('WalletAddress in HandleAccountChanged ='+currentAccount)
@@ -210,21 +210,23 @@
             let data = {
                 url: link_value,
                 title: title_value,
-                owner_address: "random",
+                owner_address: currentAccount,
                 num_tokens: num_token_value
             }
 
-            fetch("http://127.0.0.1:8000/storeDetails", {
+            let result = await fetch("http://127.0.0.1:5000/storeDetails", {
               method: "POST",
-              headers: {
-                    'accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
+              // headers: {
+              //       'accept': 'application/json',
+              //       'Content-Type': 'application/json',
+              //   },
               body: JSON.stringify(data)
             }).then(res => {
               console.log("Request complete! response:", res);
-              private_link_id = res.text;
+              private_link_id = res.text();
+              return private_link_id
             });
+            console.log(result);
 
 
             //////////////////////////////////////////////////////////////
