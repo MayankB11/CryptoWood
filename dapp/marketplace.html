@@ -26,7 +26,7 @@
             <div class="col-md-12">
                 <h2>An NFT based streaming service </h2>
             </div>  
-            <div class="row text-center col-md-12 offset-10">
+            <div class="row text-center col-md-4 offset-10">
                 <a href="creator.html" id="creatorPage">Become Creator</a>
                 <a style="margin-left: 30px;" href="consumer.html" id="consumerPage">Become Consumer</a>
             </div>      
@@ -49,29 +49,38 @@
         <section class="contract-section hidden">
             <div style="margin-top: 30px;" class="row text-center">
                 <div class="col-md-12">
-                    <h3>Upload your content</h3>
+                    <h3>Get Tokens from Marketplace</h3>
                 </div>
             </div>
-            <div class="row text-center">
-                <div class="col-md-6 offset-3">
-                    <span>Title: <i id="Title"></i><input id="titleValue" type="text" class="form-control" value=""></span>
-                </div>
-            </div>
-            <div class="row text-center">
-                <div class="col-md-6 offset-3">
-                    <span>Content Link: <i id="contentLink"></i><input id="contentLinkValue" type="text" class="form-control" value=""></span>
-                    <span>Thumbnail Link: <i id="thumbnailLink"></i><input id="thumbnailLinkValue" type="text" class="form-control" value=""></span>
-                </div>
-            </div>
-            <div class="row text-center">
-                <div class="col-md-4 offset-4">
-                    <span>
-                        Total token to issue
-                        <input id="numTokenValue" type="text" class="form-control" value=""> 
-                        Price for each token
-                        <input id="priceTokenValue" type="text" class="form-control" value="">
-                        <button id="postContent" class="btn btn-primary">List My Content</button>
-                    </span>
+
+            <div style="margin-top: 30px;" class="row text-center">
+                <div class="col-md-12 offset-3">
+                    <table style="background-color : #F1F1F1; width: 500px;">
+                      <tr>
+                        <th>CotentTitle</th>
+                        <th>Creator</th>
+                        <th>LTP</th>
+                        <th></th>
+                      </tr>
+                      <tr>
+                        <td id="content1">VideoName</td>
+                        <td id="owner1">abcd...xyz</td>
+                        <td id="price1">price</td>
+                        <td><a id="buy1" href="youtube.com">Buy</a></td>
+                      </tr>
+                      <tr>
+                        <td id="content2">VideoName</td>
+                        <td id="owner2">abcd...xyz</td>
+                        <td id="price2">price</td>
+                        <td><a id="buy2" href="https://www.youtube.com" target="_blank">Buy</a></td>
+                      </tr>
+                      <tr>
+                        <td id="content3">VideoName</td>
+                        <td id="owner3">abcd...xyz</td>
+                        <td id="price3">price</td>
+                        <td><a id="buy3" href="youtube.com">Buy</a></td>
+                      </tr>
+                    </table>
                 </div>
             </div>
         </section>
@@ -256,7 +265,10 @@
 
         }
     </script>
-    <script>   
+    <script>  
+
+        $('#price1').html('254 ETH')
+
         $.getJSON("build/contracts/ContentToken.json", function(result) {            
                 abiToken = result.abi 
                 console.log('abiToken')
