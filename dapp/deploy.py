@@ -10,24 +10,42 @@ key='0xd7f3d3c4ee2ed9742acf562b2fb164eb108cb610a72b001752859875b2c60229' #added 
 acct = w3.eth.account.privateKeyToAccount(key)
 
 # compile your smart contract with truffle first
-truffleFile = json.load(open('./build/contracts/ContentToken.json'))
-abi = truffleFile['abi']
-bytecode = truffleFile['bytecode']
-contract= w3.eth.contract(bytecode=bytecode, abi=abi)
+chainLinkContract = json.load(open('./build/contracts/APIChainlink.json'))
+abiCL = chainLinkContract['abi']
+bytecodeCL = chainLinkContract['bytecode']
+contractCL = w3.eth.contract(bytecode=bytecodeCL, abi=abiCL)
+
+contentTokenContract = json.load(open('./build/contracts/ContentToken.json'))
+abiCT = contentTokenContract['abi']
+bytecodeCT = contentTokenContract['bytecode']
+contractCT = w3.eth.contract(bytecode=bytecodeCT, abi=abiCT)
 
 mkt = '0x60122f204B150bAD7b67f467C918d4eDfF26181E'
 
 #building transaction
-construct_txn = contract.constructor(acct.address, mkt).buildTransaction({
+construct_txn_CL = contractCL.constructor().buildTransaction({
     'from': acct.address,
     'nonce': w3.eth.getTransactionCount(acct.address),
     'gas': 5728712,
     'gasPrice': w3.toWei('20', 'gwei')})
-
-
-signed = acct.signTransaction(construct_txn)
-
-tx_hash=w3.eth.sendRawTransaction(signed.rawTransaction)
+signed = acct.signTransaction(construct_txn_CL)
+tx_hash = w3.eth.sendRawTransaction(signed.rawTransaction)
 print(tx_hash.hex())
 tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-print("Contract Deployed At:", tx_receipt['contractAddress'])
+print("Contract Chain Link Deployed At:", tx_receipt['contractAddress'])
+
+construct_txn_CT = contractCT.constructor(acct.address, mkt, tx_receipt['contractAddress']).buildTransaction({
+    'from': acct.address,
+    'nonce': w3.eth.getTransactionCount(acct.address),
+    'gas': 5728712,
+    'gasPrice': w3.toWei('20', 'gwei')})
+signed = acct.signTransaction(construct_txn_CT)
+tx_hash = w3.eth.sendRawTransaction(signed.rawTransaction)
+print(tx_hash.hex())
+tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+print("Contract Content Token Deployed At:", tx_receipt['contractAddress'])
+
+address_contract_CT = tx_receipt['contractAddress']
+
+# now create a transaction to set content token address to chain link contract
+# by calling the setContractAddress(_address) function
