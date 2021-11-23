@@ -26,8 +26,9 @@
             <div class="col-md-12">
                 <h2>An NFT based streaming service </h2>
             </div>     
-            <div class="row text-center col-md-12 offset-10">
-                <a href="creator.html" id="switchUser">Switch to Creator</a>
+            <div class="row text-center col-md-4 offset-10">
+                <a href="creator.html" id="creatorPage">Become Creator</a>
+                <a style="margin-left: 30px;" href="marketplace.html" id="marketplacePage">Trade Tokens</a>
             </div>
             </div>       
         </div>
@@ -49,7 +50,7 @@
         <section class="contract-section hidden">
             <div style="margin-top: 20px;" class="row text-center">
                 <div class="col-md-12">
-                    <h3>Select a content to Watch</h3>
+                    <h3>Select a content to Watch/Trade</h3>
                 </div>
             </div>
             
@@ -63,7 +64,9 @@
 
                         <button id="w1" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
 
-                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>  
+                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
+
+                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
                     </span>
                 </div>
 
@@ -77,6 +80,8 @@
                         <button id="w2" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
 
                         <button id="b2" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
+
+                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
                     </span>
                 </div>
 
@@ -90,6 +95,8 @@
                         <button id="w3" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
 
                         <button id="b3" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
+
+                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
                     </span>
                 </div>
 
@@ -293,7 +300,7 @@
                 $('#metaicon').removeClass('meta-gray')
                 $('#metaicon').addClass('meta-normal')
                 $('#enableMetamask').attr('disabled',false)
-                connect() // Make sure the connected wallet is being returned
+                // connect() // Make sure the connected wallet is being returned
             } else {
                 $('#enableMetamask').attr('disabled',true)
                 $('#metaicon').removeClass('meta-normal')
