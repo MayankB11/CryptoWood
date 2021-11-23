@@ -4,10 +4,15 @@ pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
+interface ChainLinkContract {
+    function requestMintGateAccess(uint256 tokenId, uint privateLinkId) external returns (bytes32 requestId);
+}
+
 contract ContentToken is ERC1155 {
     address public owner;
     address public marketPlace;
     uint256 public totalTypesOfTokens;
+    address public chainLinkContract;
     
     struct TokenInfo{
         address creator;
@@ -34,13 +39,19 @@ contract ContentToken is ERC1155 {
         _;
     }
 
-    constructor(address owner_, address marketPlace_) ERC1155("") {
+    modifier onlyChainLink(){
+        require(msg.sender == chainLinkContract, "only chainLink API contract can call this");
+        _;
+    }
+
+    constructor(address owner_, address marketPlace_, address _chainLinkContract) ERC1155("") {
         owner = owner_;
         marketPlace = marketPlace_;
         totalTypesOfTokens = 0;
+        chainLinkContract = _chainLinkContract;
     }
     
-    function addNewToken(uint256 initialSupply, uint256 price) public returns (uint256){
+    function addNewToken(uint256 initialSupply, uint256 price, uint privatLinkId) public returns (uint256){
         
         if (creatorTokenMapping[msg.sender] == 0){
             totalTypesOfTokens++;
@@ -60,14 +71,14 @@ contract ContentToken is ERC1155 {
 
         _mint(msg.sender, tokenId, initialSupply, "");
         setApprovalForAll(marketPlace, true);
+
+        ChainLinkContract(chainLinkContract).requestMintGateAccess(tokenId, privatLinkId);
         
         return tokenId;
 
-        // ChainLink Call
-        // -- mintgate connection (Custom API call){tokenID, private-link-id}
     }
     
-    function setGatedURI(uint256 tokenID, string memory uri) public onlyOwner{
+    function setGatedURI(uint256 tokenID, string memory uri) external onlyChainLink{
         tokenInfos[tokenID].gatedURL = uri;
     }
     
