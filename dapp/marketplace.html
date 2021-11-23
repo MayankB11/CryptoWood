@@ -25,12 +25,11 @@
         <div style="margin-top: 30px;" class="row text-center">
             <div class="col-md-12">
                 <h2>An NFT based streaming service </h2>
-            </div>     
+            </div>  
             <div class="row text-center col-md-12 offset-10">
                 <a href="creator.html" id="creatorPage">Become Creator</a>
-                <a style="margin-left: 30px;" href="marketplace.html" id="marketplacePage">Trade Tokens</a>
-            </div>
-            </div>       
+                <a style="margin-left: 30px;" href="consumer.html" id="consumerPage">Become Consumer</a>
+            </div>      
         </div>
         <div class="row text-center">
             <div class="col-md-12">
@@ -48,61 +47,33 @@
             </div>
         </div>
         <section class="contract-section hidden">
-            <div style="margin-top: 20px;" class="row text-center">
+            <div style="margin-top: 30px;" class="row text-center">
                 <div class="col-md-12">
-                    <h3>Select a content to Watch/Trade</h3>
+                    <h3>Upload your content</h3>
                 </div>
             </div>
-            
             <div class="row text-center">
-                <div class="col-md-2 offset-2" style="margin-top: 40px;">
-                    
-                    <span>
-                        <h7>CONTENT 1</h7>
-
-                        <img id="c1" class="meta-normal" width="250" height="150" src="https://www.youtube.com/watch?v=JgTB6pSogc0">
-
-                        <button id="w1" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
-
-                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
-
-                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
-                    </span>
+                <div class="col-md-6 offset-3">
+                    <span>Title: <i id="Title"></i><input id="titleValue" type="text" class="form-control" value=""></span>
                 </div>
-
-                <div class="col-md-2" style="margin-top: 40px; margin-left: 120px;">
-                    
-                    <span>
-                        <h7>CONTENT 2</h7>
-
-                        <img id="c2" class="meta-normal" width="250" height="150" src="https://i.ytimg.com/an_webp/I7ynijcZl7Q/mqdefault_6s.webp?du=3000&sqp=CJCY7owG&rs=AOn4CLD2RQ6BQ5WtkyXTtAWkdSD1FpGo5Q">
-
-                        <button id="w2" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
-
-                        <button id="b2" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
-
-                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
-                    </span>
-                </div>
-
-                <div class="col-md-2" style="margin-top: 40px; margin-left: 120px;">
-                    
-                    <span>
-                        <h7>CONTENT 3</h7>
-
-                        <img id="c3" class="meta-normal" width="250" height="150" src="https://i.ytimg.com/an_webp/I7ynijcZl7Q/mqdefault_6s.webp?du=3000&sqp=CJCY7owG&rs=AOn4CLD2RQ6BQ5WtkyXTtAWkdSD1FpGo5Q">
-
-                        <button id="w3" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
-
-                        <button id="b3" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
-
-                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
-                    </span>
-                </div>
-
             </div>
-
-
+            <div class="row text-center">
+                <div class="col-md-6 offset-3">
+                    <span>Content Link: <i id="contentLink"></i><input id="contentLinkValue" type="text" class="form-control" value=""></span>
+                    <span>Thumbnail Link: <i id="thumbnailLink"></i><input id="thumbnailLinkValue" type="text" class="form-control" value=""></span>
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-md-4 offset-4">
+                    <span>
+                        Total token to issue
+                        <input id="numTokenValue" type="text" class="form-control" value=""> 
+                        Price for each token
+                        <input id="priceTokenValue" type="text" class="form-control" value="">
+                        <button id="postContent" class="btn btn-primary">List My Content</button>
+                    </span>
+                </div>
+            </div>
         </section>
     </div>  
 
@@ -229,14 +200,18 @@
             /////////////////////////  Custom API Call
 
             title_value = $('#titleValue').val()
-            link_value = $('#linkValue').val()
+            content_link_value = $('#contentLinkValue').val()
+            thumbnail_link_value = $('#thumbnailLinkValue').val()
             num_token_value = $('#numTokenValue').val()
+            price_token_value = $('#priceTokenValue').val()
 
             let data = {
                 url: link_value,
+                thumbnail_link: thumbnail_link_value,
                 title: title_value,
                 owner_address: currentAccount,
-                num_tokens: num_token_value
+                num_tokens: num_token_value,
+                price_per_token: price_token_value
             }
 
             let result = await fetch("http://127.0.0.1:5000/storeDetails", {
@@ -300,7 +275,7 @@
                 $('#metaicon').removeClass('meta-gray')
                 $('#metaicon').addClass('meta-normal')
                 $('#enableMetamask').attr('disabled',false)
-                connect() // Make sure the connected wallet is being returned
+                //connect() // Make sure the connected wallet is being returned
             } else {
                 $('#enableMetamask').attr('disabled',true)
                 $('#metaicon').removeClass('meta-normal')
