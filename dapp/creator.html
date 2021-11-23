@@ -58,7 +58,8 @@
             </div>
             <div class="row text-center">
                 <div class="col-md-6 offset-3">
-                    <span>Content Link: <i id="Link"></i><input id="linkValue" type="text" class="form-control" value=""></span>
+                    <span>Content Link: <i id="contentLink"></i><input id="contentLinkValue" type="text" class="form-control" value=""></span>
+                    <span>Thumbnail Link: <i id="thumbnailLink"></i><input id="thumbnailLinkValue" type="text" class="form-control" value=""></span>
                 </div>
             </div>
             <div class="row text-center">
@@ -66,6 +67,8 @@
                     <span>
                         Total token to issue
                         <input id="numTokenValue" type="text" class="form-control" value=""> 
+                        Price for each token
+                        <input id="priceTokenValue" type="text" class="form-control" value="">
                         <button id="postContent" class="btn btn-primary">List My Content</button>
                     </span>
                 </div>
@@ -152,14 +155,6 @@
 
         }
 
-        function httpGet(theUrl)
-        {
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
-            xmlHttp.send( null );
-            return xmlHttp.responseText;
-        }
-
         async function postContent() {
 
 
@@ -204,14 +199,18 @@
             /////////////////////////  Custom API Call
 
             title_value = $('#titleValue').val()
-            link_value = $('#linkValue').val()
+            content_link_value = $('#contentLinkValue').val()
+            thumbnail_link_value = $('#thumbnailLinkValue').val()
             num_token_value = $('#numTokenValue').val()
+            price_token_value = $('#priceTokenValue').val()
 
             let data = {
                 url: link_value,
+                thumbnail_link: thumbnail_link_value,
                 title: title_value,
                 owner_address: currentAccount,
-                num_tokens: num_token_value
+                num_tokens: num_token_value,
+                price_per_token: price_token_value
             }
 
             let result = await fetch("http://127.0.0.1:5000/storeDetails", {
