@@ -2,9 +2,11 @@ import uuid
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
+from firebase_admin import firestore
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
+import time
 
 app = Flask(__name__)
 # api = Api(app)
@@ -45,18 +47,24 @@ def after_request(response):
 def storeDetails():
 	data = request.get_json(force=True)
 	print (data)
-	if "url" in data and "title" in data and "owner_address" in data and "num_tokens" in data:
+	if "url" in data and "title" in data and "owner_address" in data and "num_tokens" in data \
+		and "price" in data and "thumbnail" in data:
 		url = data["url"]
 		private_link_id = uuid.uuid1().hex
 		title = data["title"]
 		owner_address = data["owner_address"]
 		num_tokens = data["num_tokens"]
+		price = data["price"]
+		thumbnail = data["thumbnail"]
 		post_data = {
 			"private_link_id" :private_link_id, 
 			"title" : title,
 			"url" : url,
 			"owner_address" : owner_address,
-			"num_tokens" : num_tokens
+			"num_tokens" : num_tokens,
+			"price" : price,
+			"thumbnail" : thumbnail,
+			"epoch" : int(time.time())
 		}
 		ref.push(post_data)
 		return private_link_id
@@ -100,10 +108,18 @@ def createGatedAccess():
 				print("Mintgate Request : ", request)
 				response = requests.post('http://mgate.io/api/v2/links/create', headers = headers, json = mintgate_params)
 				print("Mintgate Response : ", response.text)
-				return response.json()
+				id = response.json()["id"]
+				ref.child(key).update({"id":id})
+				return id
 		return "Either access to db failed or private_link_id not found on DB",400
 	else:
 		return "Either token id or private link id field is empty in the request",400
+
+@app.route('/viewLastSix/', methods=['POST'])
+def viewLastSix():
+	
+	storedData = ref.order_by_child("epoch").limit_to_last(6).get()
+	return storedData
 
 # class HelloWorld(Resource):
 #     def get(self):
