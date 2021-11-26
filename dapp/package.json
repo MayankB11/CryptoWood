@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@chainlink/contracts": "^0.2.2",
     "@openzeppelin/contracts": "^4.3.3",
     "cors": "^2.8.5",
     "http-server": "^14.0.0"

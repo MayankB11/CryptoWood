@@ -90,8 +90,8 @@
         let currentAccount = null;
         let web3;
         let abi;
-        let contractTokenAddress = '0xA8337c9EdBeF1885cf6Dee4C4951e60cB93C426F'
-        let contractMarketAddress = '0x60122f204B150bAD7b67f467C918d4eDfF26181E'
+        let contractTokenAddress = '0x5dd1c19004AC5D61A469EfcE3066E65ae91B5563'
+        let contractMarketAddress = '0x0D909816bA4A4b70155eD8bb7e4D7f459370aF88'
         let private_link_id = null;
         
         function handleAccountsChanged(accounts) {
@@ -165,45 +165,8 @@
 
         }
 
-        async function postContent() {
+        async function getContentToDisplay() {
 
-
-/*
-            console.log("transaction code started from: "+currentAccount)
-
-            //const util = require('ethereumjs-util'); 
-            //var hex = util.bufferToHex(util.setLengthLeft(input_value, 32));
-
-            //var hex = '0x' + sprintf('%064d', input_value*1000000000);
-
-            const transactionParameters = {
-                  //nonce: '0x00', // ignored by MetaMask
-                  //gasPrice: '0x09184e72a000', // customizable by user during MetaMask confirmation.
-                  //gas: '0x21000', // customizable by user during MetaMask confirmation.
-                  to: '0xc343138090D621aF736C7f6b2183eF475C4ABd20', // Required except during contract publications. (taken from metamask acc2)
-                  from: ethereum.selectedAddress, // must match user's active address.
-                  //value: '0x100000000000', // Only required to send ether to the recipient from the initiating external account.
-                  value: trx_value.toString(16),
-                  //data:input_value, // Optional, but used for defining smart contract creation and interaction.
-                  //chainId: '0x3', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
-              };
-/*
-            const txHash = await ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [transactionParameters],
-            })
-            .then((result) => {
-                console.log(result);
-                // The result varies by RPC method.
-                // For example, this method will return a transaction hash hexadecimal string on success.
-            })
-            .catch((error) => {
-                // If the request fails, the Promise will reject with an error.
-            });;
-
-            console.log('transaction code finished')
-*/
-            ////////////////////////////////////////////////////////////////////
 
 
             /////////////////////////  Custom API Call
@@ -215,53 +178,61 @@
             price_token_value = $('#priceTokenValue').val()
 
             let data = {
-                url: link_value,
-                thumbnail_link: thumbnail_link_value,
+                url: content_link_value,
                 title: title_value,
                 owner_address: currentAccount,
                 num_tokens: num_token_value,
-                price_per_token: price_token_value
+                price: price_token_value,
+                thumbnail: thumbnail_link_value,
             }
 
-            let result = await fetch("http://127.0.0.1:5000/storeDetails", {
+            let result = await fetch(" http://127.0.0.1:5000/viewLastSix/", {
               method: "POST",
               // headers: {
               //       'accept': 'application/json',
               //       'Content-Type': 'application/json',
               //   },
-              body: JSON.stringify(data)
+              // body: JSON.stringify(data)
             }).then(res => {
               console.log("Request complete! response:", res);
-              private_link_id = res.text();
-              return private_link_id
+              return res.text();
             });
+
             console.log(result);
-
-
-            //////////////////////////////////////////////////////////////
-
-
-            ////////////////////////  Smart Contract Call
-
-            contractToken.methods.addNewToken(10, 100000000000)  // (initial supply, price per token)
-            .send({from:ethereum.selectedAddress})
-            .then(function (result) {
-                console.log(result);
-                getValue()
-            });
-
-            //////////////////////////////////////////////////////////////
-
-
-/*
-            contractMarket.methods.setContentTokenAddress(contractTokenAddress)
-            .send({from:ethereum.selectedAddress})
-            .then(function (result) {
-                console.log(result);
-                //$('#getValue').html(input_value)
-            });
-*/
             
+
+            //TODO: 
+            ///////////////////////////////  Make array/list of the top entries returned by Custom API
+
+
+            //TODO:
+            ////////////////////////  Smart Contract Call (fetch LTP for all top entries)
+
+            const contractMarket = new web3.eth.Contract(
+                        abiMarket,
+                        contractMarketAddress
+            );
+
+            contractMarket.methods.getLowestPriceAndSeller(1)  // (token-id)
+            .send({from:ethereum.selectedAddress, gas:5728712})
+            .then(function (result) {
+                console.log("transaction details");
+                console.log(result);
+            });
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        }
+
+
+        // Function to be called on button click
+        async function buyCallToSC(tokenID, ltp, ltpAddr) {
+
+            //TODO:
+            ////////////////////////  Smart Contract Call (place buy order on SC)
+            
+
 
         }
     </script>
@@ -298,15 +269,13 @@
                 connect()
             });
 
-            $('#postContent').click(function() {
-                postContent()
-            });
-
             try {            
                 web3 = new Web3(window.ethereum);
             } catch (error) {
                 alert(error)
-            }            
+            } 
+
+            getContentToDisplay()           
             
         })
     </script>  

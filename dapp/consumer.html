@@ -110,8 +110,8 @@
         let currentAccount = null;
         let web3;
         let abi;
-        let contractTokenAddress = '0xA8337c9EdBeF1885cf6Dee4C4951e60cB93C426F'
-        let contractMarketAddress = '0x60122f204B150bAD7b67f467C918d4eDfF26181E'
+        let contractTokenAddress = '0x5dd1c19004AC5D61A469EfcE3066E65ae91B5563'
+        let contractMarketAddress = '0x0D909816bA4A4b70155eD8bb7e4D7f459370aF88'
         let private_link_id = null;
         
         function handleAccountsChanged(accounts) {
@@ -239,7 +239,7 @@
                 num_tokens: num_token_value
             }
 
-            let result = await fetch("http://127.0.0.1:5000/storeDetails", {
+            let result = await fetch("http://127.0.0.1:5000/storeDetails/", {
               method: "POST",
               // headers: {
               //       'accept': 'application/json',
