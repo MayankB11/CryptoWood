@@ -10,7 +10,7 @@ import time
 
 app = Flask(__name__)
 # api = Api(app)
-cors = CORS(app)
+cors = CORS(app, send_wildcard=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 import requests
@@ -19,7 +19,7 @@ from flask import logging
 
 import json
 
-CORS(app, send_wildcard=True)
+#CORS(app, send_wildcard=True)
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('./serviceAccountKey.json')
@@ -67,7 +67,8 @@ def storeDetails():
 			"epoch" : int(time.time())
 		}
 		ref.push(post_data)
-		return private_link_id
+		#return private_link_id
+		return "4056"
 	else:
 		return "Either of the field(s) is/are empty in the request",400
 

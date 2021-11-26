@@ -29,6 +29,7 @@
             <div class="row text-center col-md-4 offset-10">
                 <a href="consumer.html" id="consumerPage">Become Consumer</a>
                 <a style="margin-left: 30px;" href="marketplace.html" id="marketplacePage">Trade Tokens</a>
+                <button id="connectContract" class="btn btn-primary">connect contracts</button>
             </div>      
         </div>
         <div class="row text-center">
@@ -81,8 +82,8 @@
         let currentAccount = null;
         let web3;
         let abi;
-        let contractTokenAddress = '0xA8337c9EdBeF1885cf6Dee4C4951e60cB93C426F'
-        let contractMarketAddress = '0x60122f204B150bAD7b67f467C918d4eDfF26181E'
+        let contractTokenAddress = '0x5dd1c19004AC5D61A469EfcE3066E65ae91B5563'
+        let contractMarketAddress = '0x0D909816bA4A4b70155eD8bb7e4D7f459370aF88'
         let private_link_id = null;
         
         function handleAccountsChanged(accounts) {
@@ -156,6 +157,36 @@
 
         }
 
+        async function connectContract() {
+
+            const contractMarket = new web3.eth.Contract(
+                        abiMarket,
+                        contractMarketAddress
+            );
+
+            contractMarket.methods.setContentTokenAddress(contractTokenAddress)  // (initial supply, price per token)
+            .send({from:ethereum.selectedAddress})
+            .then(function (result) {
+                console.log("contract-linking MarketPlace and ContentToken")
+                console.log(result);
+            });
+
+            const contractToken = new web3.eth.Contract(
+                        abiToken,
+                        contractTokenAddress
+            );
+
+            contractToken.methods.setApprovalForMarketPlace()  // (initial supply, price per token)
+            .send({from:ethereum.selectedAddress})
+            .then(function (result) {
+                console.log('setting Approval for marketPlace')
+                console.log(result); 
+            });
+
+            
+
+        }
+
         async function postContent() {
 
 
@@ -206,15 +237,16 @@
             price_token_value = $('#priceTokenValue').val()
 
             let data = {
-                url: link_value,
-                thumbnail_link: thumbnail_link_value,
+                url: content_link_value,
                 title: title_value,
                 owner_address: currentAccount,
                 num_tokens: num_token_value,
-                price_per_token: price_token_value
+                price: price_token_value,
+                thumbnail: thumbnail_link_value,
             }
 
-            let result = await fetch("http://127.0.0.1:5000/storeDetails", {
+            let result = await fetch("http://127.0.0.1:5000/storeDetails/", {
+            //let result = await fetch("https://chain-link-hackathon.herokuapp.com/storeDetails", {
               method: "POST",
               // headers: {
               //       'accept': 'application/json',
@@ -223,10 +255,12 @@
               body: JSON.stringify(data)
             }).then(res => {
               console.log("Request complete! response:", res);
+              //console.log(res.text());
               private_link_id = res.text();
+              console.log(private_link_id);
               return private_link_id
             });
-            console.log(result);
+            console.log(parseInt(result));
 
 
             //////////////////////////////////////////////////////////////
@@ -234,29 +268,54 @@
 
             ////////////////////////  Smart Contract Call
 
-            contractToken.methods.addNewToken(10, 100000000000)  // (initial supply, price per token)
-            .send({from:ethereum.selectedAddress})
+            const contractToken = new web3.eth.Contract(
+                        abiToken,
+                        contractTokenAddress
+            );
+
+            const contractMarket = new web3.eth.Contract(
+                        abiMarket,
+                        contractMarketAddress
+            );
+
+            // Mint 100 tokens for the creator
+            contractToken.methods.addNewToken(num_token_value, price_token_value, parseInt(result))  // (initial supply, price per token, private-link-id)
+            .send({from:ethereum.selectedAddress, gas: 5728712})
             .then(function (result) {
+                console.log('transaction details')
                 console.log(result);
-                getValue()
+
+                // Fetch tokenID
+                contractToken.methods.addNewToken(0,0,0)
+                .call({from:ethereum.selectedAddress, gas: 5728712}) 
+                .then(function (result) {
+                    tokenID = result;
+                    console.log('tokenID')
+                    console.log(tokenID);
+
+                    // TODO: Automatically set sell price "55555"
+                    contractMarket.methods.sellToken(tokenID, 55555)
+                    .send({from:ethereum.selectedAddress, gas: 5728712}) 
+                    .then(function (result) {
+                        console.log('transaction details - sellToken')
+                        console.log(result);
+                    });
+                });
+                
+
+                
             });
 
-            //////////////////////////////////////////////////////////////
-
-
-/*
-            contractMarket.methods.setContentTokenAddress(contractTokenAddress)
-            .send({from:ethereum.selectedAddress})
-            .then(function (result) {
-                console.log(result);
-                //$('#getValue').html(input_value)
-            });
-*/
             
+
+
+
+            /////////////////////////////////////////////////////////////          
 
         }
     </script>
     <script>   
+
         $.getJSON("build/contracts/ContentToken.json", function(result) {            
                 abiToken = result.abi 
                 console.log('abiToken')
@@ -288,6 +347,10 @@
 
             $('#postContent').click(function() {
                 postContent()
+            });
+
+            $('#connectContract').click(function() {
+                connectContract()
             });
 
             try {            
