@@ -66,7 +66,7 @@
                         <td id="content1">VideoName</td>
                         <td id="owner1">abcd...xyz</td>
                         <td id="price1">price</td>
-                        <td><a id="buy1" href="youtube.com">Buy</a></td>
+                        <td><button id='buy1' class="link">Buy</button></td>
                       </tr>
                       <tr>
                         <td id="content2">VideoName</td>
@@ -93,6 +93,11 @@
         let contractTokenAddress = '0x5dd1c19004AC5D61A469EfcE3066E65ae91B5563'
         let contractMarketAddress = '0x0D909816bA4A4b70155eD8bb7e4D7f459370aF88'
         let private_link_id = null;
+
+        var ltp=null, ltpAddr=null;
+        var contractMarket=null;
+        var contractToken=null;
+        //var lastFetch=null;
         
         function handleAccountsChanged(accounts) {
             console.log('Calling HandleChanged')
@@ -141,12 +146,6 @@
 
         async function getValue() {
             console.log('GetValue')
-            const contractToken = new web3.eth.Contract(
-                        abiToken,
-                        contractTokenAddress
-            );
-            console.log('abiToken')
-            console.log(abiToken) 
 
             contractToken.methods.getTokenPriceAndCreator(1).call().then(function (result) {       
                 console.log('TokenPriceResult')
@@ -167,90 +166,74 @@
 
         async function getContentToDisplay() {
 
-
-
             /////////////////////////  Custom API Call
 
-            title_value = $('#titleValue').val()
-            content_link_value = $('#contentLinkValue').val()
-            thumbnail_link_value = $('#thumbnailLinkValue').val()
-            num_token_value = $('#numTokenValue').val()
-            price_token_value = $('#priceTokenValue').val()
-
-            let data = {
-                url: content_link_value,
-                title: title_value,
-                owner_address: currentAccount,
-                num_tokens: num_token_value,
-                price: price_token_value,
-                thumbnail: thumbnail_link_value,
-            }
-
-            let result = await fetch(" http://127.0.0.1:5000/viewLastSix/", {
+            let lastFetch = await fetch(" http://127.0.0.1:5000/viewLastSix/", {
+            //let result = await fetch("https://chain-link-hackathon.herokuapp.com/viewLastSix/", {
               method: "POST",
-              // headers: {
-              //       'accept': 'application/json',
-              //       'Content-Type': 'application/json',
-              //   },
-              // body: JSON.stringify(data)
             }).then(res => {
-              console.log("Request complete! response:", res);
-              return res.text();
+                console.log("Request complete! response:", res);
+                let jsonObj= res.text().then(function(text){
+                    return JSON.parse(text);
+                });
+                //console.log('jsonObj');
+                //console.log(jsonObj);
+                return jsonObj;
+                
             });
 
-            console.log(result);
+            console.log('lastFetch');
+            console.log(lastFetch);
             
 
             //TODO: 
             ///////////////////////////////  Make array/list of the top entries returned by Custom API
+            contentKeys = Object.keys(lastFetch);
+            console.log('contentKeys');
+            console.log(contentKeys);
+            dataObj = lastFetch[contentKeys[contentKeys.length-1]];
+            console.log(dataObj);
 
 
             //TODO:
             ////////////////////////  Smart Contract Call (fetch LTP for all top entries)
 
-            const contractMarket = new web3.eth.Contract(
-                        abiMarket,
-                        contractMarketAddress
-            );
-
-            contractMarket.methods.getLowestPriceAndSeller(1)  // (token-id)
-            .send({from:ethereum.selectedAddress, gas:5728712})
+            contractMarket.methods.getLowestPriceAndSeller(23)  // (token-id)
+            .call({from:ethereum.selectedAddress, gas:5728712})
             .then(function (result) {
-                console.log("transaction details");
-                console.log(result);
+                console.log("getPrice transaction details");
+                console.log(result[0]);
+                ltp = result[0];
+                ltpAddr = result[1];
+                $('#price1').html(ltp)
+                $('#owner1').html(ltpAddr.substring(0,5)+"....."+ltpAddr.substring(ltpAddr.length-3,ltpAddr.length))
             });
-
             ////////////////////////////////////////////////////////////////////////////////////////////////
-
-
+            
         }
 
 
         // Function to be called on button click
         async function buyCallToSC(tokenID, ltp, ltpAddr) {
 
+            console.log("placing Buy order");
+            console.log(ltp);
+            console.log(ltpAddr);
+
             //TODO:
             ////////////////////////  Smart Contract Call (place buy order on SC)
-            
-
-
+            contractMarket.methods.buyTokenFromMarket(23, ltpAddr)  // (token-id)
+            .send({from:ethereum.selectedAddress, gas:5728712, value: ltp})
+            .then(function (result) {
+                console.log("buy transaction details");
+                console.log(result);
+            });
         }
+
     </script>
     <script>  
 
-        $('#price1').html('254 ETH')
-
-        $.getJSON("build/contracts/ContentToken.json", function(result) {            
-                abiToken = result.abi 
-                console.log('abiToken')
-                console.log(abiToken)               
-            });
-
-        $.getJSON("build/contracts/MarketPlace.json", function(result) {            
-                abiMarket = result.abi 
-                console.log('abiMarket')
-                console.log(abiMarket)               
-            });
+        $('#price1').html('--- ETH')
              
         $( document ).ready(function() {
             m = detectMetaMask()
@@ -269,13 +252,33 @@
                 connect()
             });
 
-            try {            
+            try {       
+                console.log("setting up contract object")     
                 web3 = new Web3(window.ethereum);
+
+                // Token Contract
+                $.getJSON("build/contracts/ContentToken.json", function(result) {            
+                    abiToken = result.abi;  
+                    contractToken = new web3.eth.Contract(abiToken, contractTokenAddress);      
+                    });
+
+                // MarketPlace Contract
+                $.getJSON("build/contracts/MarketPlace.json", function(result) {            
+                    abiMarket = result.abi;
+                    contractMarket = new web3.eth.Contract(abiMarket, contractMarketAddress);        
+                    });
             } catch (error) {
                 alert(error)
-            } 
+            }            
 
-            getContentToDisplay()           
+            $('#buy1').click(function() {
+                buyCallToSC(16, ltp, ltpAddr);
+            });
+
+            getContentToDisplay();   
+
+               
+
             
         })
     </script>  
