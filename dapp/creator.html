@@ -82,12 +82,14 @@
         let currentAccount = null;
         let web3;
         let abi;
-        let contractTokenAddress = '0x5dd1c19004AC5D61A469EfcE3066E65ae91B5563'
-        let contractMarketAddress = '0x0D909816bA4A4b70155eD8bb7e4D7f459370aF88'
+        let contractTokenAddress = '0x981176534e3eE3fF476a5e21EaD4D6f15a137164'
+        let contractMarketAddress = '0x4016814d7Fa4b2f6da0a699B409Df39f928F4bB1'
+        let contractLinkAddress = '0xB1F6E1C4C85a124ac2F19c7a3f87dc55Ee748A3d'
         let private_link_id = null;
 
         var contractToken=null;
         var contractMarket=null;
+        var contractLink=null;
 
         var abiToken=null;
         var abiMarket=null;
@@ -138,95 +140,32 @@
             }
         }
 
-        async function getValue() {
-            console.log('GetValue')
-            
-            contractToken.methods.getTokenPriceAndCreator(1).call().then(function (result) {       
-                console.log('TokenPriceResult')
-                console.log(result)         
-                //$('#getValue').html(result)
-            });
-
-
-            console.log('getValue- Exit')
-
-            contractToken.methods.owner().call().then(function (result) {       
-                console.log('resultOwner')
-                console.log(result)         
-                //$('#getValue').html(result)
-            });
-
-        }
-
         async function connectContract() {
 
-            const contractMarket = new web3.eth.Contract(
-                        abiMarket,
-                        contractMarketAddress
-            );
+            // contractMarket.methods.setContentTokenAddress(contractTokenAddress)  // (initial supply, price per token)
+            // .send({from:ethereum.selectedAddress})
+            // .then(function (result) {
+            //     console.log("contract-linking MarketPlace and ContentToken")
+            //     console.log(result);
+            // });
 
-            contractMarket.methods.setContentTokenAddress(contractTokenAddress)  // (initial supply, price per token)
+            // contractToken.methods.setApprovalForMarketPlace()  
+            // .send({from:ethereum.selectedAddress})
+            // .then(function (result) {
+            //     console.log('setting Approval for marketPlace')
+            //     console.log(result); 
+            // });
+
+            contractLink.methods.setContractAddress(contractTokenAddress) 
             .send({from:ethereum.selectedAddress})
             .then(function (result) {
-                console.log("contract-linking MarketPlace and ContentToken")
-                console.log(result);
-            });
-
-            const contractToken = new web3.eth.Contract(
-                        abiToken,
-                        contractTokenAddress
-            );
-
-            contractToken.methods.setApprovalForMarketPlace()  // (initial supply, price per token)
-            .send({from:ethereum.selectedAddress})
-            .then(function (result) {
-                console.log('setting Approval for marketPlace')
+                console.log('setting tokenAddress in chainlink')
                 console.log(result); 
             });
-
-            
 
         }
 
         async function postContent() {
-
-
-/*
-            console.log("transaction code started from: "+currentAccount)
-
-            //const util = require('ethereumjs-util'); 
-            //var hex = util.bufferToHex(util.setLengthLeft(input_value, 32));
-
-            //var hex = '0x' + sprintf('%064d', input_value*1000000000);
-
-            const transactionParameters = {
-                  //nonce: '0x00', // ignored by MetaMask
-                  //gasPrice: '0x09184e72a000', // customizable by user during MetaMask confirmation.
-                  //gas: '0x21000', // customizable by user during MetaMask confirmation.
-                  to: '0xc343138090D621aF736C7f6b2183eF475C4ABd20', // Required except during contract publications. (taken from metamask acc2)
-                  from: ethereum.selectedAddress, // must match user's active address.
-                  //value: '0x100000000000', // Only required to send ether to the recipient from the initiating external account.
-                  value: trx_value.toString(16),
-                  //data:input_value, // Optional, but used for defining smart contract creation and interaction.
-                  //chainId: '0x3', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
-              };
-/*
-            const txHash = await ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [transactionParameters],
-            })
-            .then((result) => {
-                console.log(result);
-                // The result varies by RPC method.
-                // For example, this method will return a transaction hash hexadecimal string on success.
-            })
-            .catch((error) => {
-                // If the request fails, the Promise will reject with an error.
-            });;
-
-            console.log('transaction code finished')
-*/
-            ////////////////////////////////////////////////////////////////////
 
 
             /////////////////////////  Custom API Call
@@ -246,8 +185,8 @@
                 thumbnail: thumbnail_link_value,
             }
 
-            let result = await fetch("http://127.0.0.1:5000/storeDetails/", {
-            //let result = await fetch("https://chain-link-hackathon.herokuapp.com/storeDetails/", {
+            //let result = await fetch("http://127.0.0.1:5000/storeDetails/", {
+            let result = await fetch("https://chain-link-hackathon.herokuapp.com/storeDetails/", {
               method: "POST",
               // headers: {
               //       'accept': 'application/json',
@@ -286,20 +225,8 @@
 
                     message = "Congratulations!!! "+num_token_value+" NFTs have been minted for : "+title_value + " || TokenID = "+tokenID;
                     alert(message);  // display string message
-
-                    // TODO: Automatically set sell price "55555"
-                    contractMarket.methods.sellToken(tokenID, price_token_value)
-                    .send({from:ethereum.selectedAddress, gas: 5728712}) 
-                    .then(function (result) {
-                        console.log('transaction details - sellToken')
-                        console.log(result);
-                    });
                 });  
             });
-
-            
-
-
 
             /////////////////////////////////////////////////////////////          
 
@@ -347,6 +274,13 @@
                     abiMarket = result.abi;
                     contractMarket = new web3.eth.Contract(abiMarket, contractMarketAddress);        
                     });
+
+                // ChainLink Contract
+                $.getJSON("build/contracts/APIChainlink.json", function(result) {            
+                    abiLink = result.abi;
+                    contractLink = new web3.eth.Contract(abiLink, contractLinkAddress);        
+                    });
+
             } catch (error) {
                 alert(error)
             }            

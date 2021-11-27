@@ -40,7 +40,7 @@ contract APIChainlink is ChainlinkClient {
     {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
 
-        string memory x = string(abi.encodePacked("http://1f28-106-51-88-138.ngrok.io/mintGate", "?tokenId=", uint2str(tokenId), "&privateLinkId=", uint2str(privateLinkId)));
+        string memory x = string(abi.encodePacked("https://chain-link-hackathon.herokuapp.com/createGatedAccess/", "?tokenId=", uint2str(tokenId), "&privateLinkId=", uint2str(privateLinkId)));
         request.add("get", x);
         request.add("path", "uri");
 

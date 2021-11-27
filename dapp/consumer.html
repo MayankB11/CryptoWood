@@ -29,6 +29,7 @@
             <div class="row text-center col-md-4 offset-10">
                 <a href="creator.html" id="creatorPage">Become Creator</a>
                 <a style="margin-left: 30px;" href="marketplace.html" id="marketplacePage">Trade Tokens</a>
+                <!-- <button id="approveMarket" class="btn btn-primary">Approve Market</button> -->
             </div>
             </div>       
         </div>
@@ -64,9 +65,9 @@
 
                         <button id="w1" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
 
-                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
+                        <button id="b1" onclick="" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <button id="s1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
+                        <!-- <button id="s1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>   -->
                     </span>
                 </div>
 
@@ -79,9 +80,9 @@
 
                         <button id="w2" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
 
-                        <button id="b2" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
+                        <button id="b2" onclick="" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <button id="s2" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
+                        <!-- <button id="s2" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>   -->
                     </span>
                 </div>
 
@@ -94,9 +95,9 @@
 
                         <button id="w3" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
 
-                        <button id="b3" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
+                        <button id="b3" onclick="" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <button id="s3" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
+                        <!-- <button id="s3" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>   -->
                     </span>
                 </div>
 
@@ -110,8 +111,8 @@
         let currentAccount = null;
         let web3;
         let abi;
-        let contractTokenAddress = '0x5dd1c19004AC5D61A469EfcE3066E65ae91B5563'
-        let contractMarketAddress = '0x0D909816bA4A4b70155eD8bb7e4D7f459370aF88'
+        let contractTokenAddress = '0x981176534e3eE3fF476a5e21EaD4D6f15a137164'
+        let contractMarketAddress = '0x4016814d7Fa4b2f6da0a699B409Df39f928F4bB1'
         let private_link_id = null;
         
         function handleAccountsChanged(accounts) {
@@ -159,6 +160,26 @@
             }
         }
 
+        function setThumbnail(thumbID, thumbnailLink){
+            console.log(thumbID)
+            console.log(document.getElementById( thumbID ).src);
+            console.log(thumbnailLink)
+            document.getElementById( thumbID ).src = thumbnailLink;
+            console.log(document.getElementById( thumbID ).src);
+        }
+
+        async function buyFromCreator(tokenID, price){
+            console.log('tokenID');
+            console.log(tokenID)
+            contractMarket.methods.buyTokenFromCreator(tokenID)  // (initial supply, price per token)
+            .send({from:ethereum.selectedAddress, value: price})
+            .then(function (result) {
+                console.log('Finished buyFromCreator for tokenID: '+tokenID);
+                console.log(result); 
+
+            });
+        }
+
         async function getValue() {
             console.log('GetValue')
             const contractToken = new web3.eth.Contract(
@@ -188,8 +209,8 @@
         
         async function getContentToDisplay() {
 
-           let lastFetch = await fetch(" http://127.0.0.1:5000/viewLastSix/", {
-            //let result = await fetch("https://chain-link-hackathon.herokuapp.com/viewLastSix/", {
+            //let lastFetch = await fetch(" http://127.0.0.1:5000/viewLastSix/", {
+            let lastFetch = await fetch("https://chain-link-hackathon.herokuapp.com/viewLastSix/", {
               method: "POST",
             }).then(res => {
                 console.log("Request complete! response:", res);
@@ -212,36 +233,43 @@
             console.log('contentKeys');
             console.log(contentKeys);
             var dataObj = null;
-            for (let i = 0; i < 3; i++) {
-                dataObj = lastFetch[contentKeys[contentKeys.length-i-1]];
+            for (let i = 1; i < 4; i++) {
+                dataObj = lastFetch[contentKeys[contentKeys.length-i]];
                 console.log("dobj")
                 console.log(dataObj)
-                thumbID = i+1;
-                thumbID = 'c'+thumbID;
-                console.log(thumbID)
-                console.log(document.getElementById( thumbID ).src);
-                console.log(dataObj["thumbnail"])
-                document.getElementById( thumbID ).src = dataObj["thumbnail"];
-                console.log(document.getElementById( thumbID ).src);
+
+                // Update thumbnail
+                thumbID = 'c'+i;
+                setThumbnail(thumbID, dataObj["thumbnail"]);
+
+                //TODO Update Title
+
+                //TODO Link Watch Button to re-direct to mintgate address
+
+                //TODO Link Sell button to smart-contract
+
+                // Linked Buy button to smart-contract
+                buyID = 'b'+i
+                document.getElementById(buyID).onclick = function(){
+                    buyFromCreator(parseInt(dataObj["token_id"]), parseInt(dataObj["price"]))
+                };
+
+                //TODO Add alerts for all transaction-updates
+
+
+
+                //TODO-ADV Unhide Sell button if user has token (check using balanceOf)
+
+                //TODO-ADV Hide Buy button if dataObj does not have token_id
+
+                //TODO-ADV Make table dynamically populated if possible 
             }
-            
-            //console.log(dataArr);
-
-
-
-            // Extract url
-
-            // Extract thumbnail
-
-
-            //TODO:
-            ////////////////////////  Smart Contract Call (Buy/Sell requests)
-
       
             ////////////////////////////////////////////////////////////////////////////////////////////////
             
         }
 
+        
     </script>
     <script>   
 
@@ -262,8 +290,9 @@
                 connect()
             });
 
-            $('#postContent').click(function() {
-                postContent()
+
+            $('#approveMarket').click(function() {
+                approveMarket()
             });
 
             try {       

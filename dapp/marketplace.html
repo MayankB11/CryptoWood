@@ -39,6 +39,7 @@
         <div style="margin-top: 30px;" class="row text-center">
             <div class="col-md-12">
                 <button id="enableMetamask" class="btn btn-primary">Connect with Metamask</button>
+                <button id="approveMarket" class="btn btn-primary">Approve Market</button>
             </div>
         </div>
         <div class="row text-center">
@@ -59,26 +60,37 @@
                       <tr>
                         <th>CotentTitle</th>
                         <th>Creator</th>
-                        <th>LTP</th>
-                        <th></th>
+                        <th>LowestPrice</th>
+                        <th>Buy</th>
+                        <th>My Sell Price</th>
+                        <th>Sell</th>
                       </tr>
                       <tr>
                         <td id="content1">VideoName</td>
                         <td id="owner1">abcd...xyz</td>
                         <td id="price1">price</td>
                         <td><button id='buy1' class="link">Buy</button></td>
+                        <td><input id="sellPrice3" type="text" value=""></td>
+                        <td><button id='sell1' class="link">Sell</button></td>
+                        
                       </tr>
                       <tr>
-                        <td id="content2">VideoName</td>
-                        <td id="owner2">abcd...xyz</td>
-                        <td id="price2">price</td>
-                        <td><a id="buy2" href="https://www.youtube.com" target="_blank">Buy</a></td>
+                        <td id="content2">---</td>
+                        <td id="owner2">---</td>
+                        <td id="price2">---</td>
+                        <td><button id='buy2' class="link">Buy</button></td>
+                        <td><input id="sellPrice3" type="text" value=""></td>
+                        <td><button id='sell2' class="link">Sell</button></td>
+                        
                       </tr>
                       <tr>
-                        <td id="content3">VideoName</td>
-                        <td id="owner3">abcd...xyz</td>
-                        <td id="price3">price</td>
-                        <td><a id="buy3" href="youtube.com">Buy</a></td>
+                        <td id="content3">---</td>
+                        <td id="owner3">---</td>
+                        <td id="price3">---</td>
+                        <td><button id='buy3' class="link">Buy</button></td>
+                        <td><input id="sellPrice3" type="text" value=""></td>
+                        <td><button id='sell3' class="link">Sell</button></td>
+                        
                       </tr>
                     </table>
                 </div>
@@ -90,8 +102,8 @@
         let currentAccount = null;
         let web3;
         let abi;
-        let contractTokenAddress = '0x5dd1c19004AC5D61A469EfcE3066E65ae91B5563'
-        let contractMarketAddress = '0x0D909816bA4A4b70155eD8bb7e4D7f459370aF88'
+        let contractTokenAddress = '0x981176534e3eE3fF476a5e21EaD4D6f15a137164'
+        let contractMarketAddress = '0x4016814d7Fa4b2f6da0a699B409Df39f928F4bB1'
         let private_link_id = null;
 
         var ltp=null, ltpAddr=null;
@@ -164,12 +176,55 @@
 
         }
 
+        async function getLowestPriceAndSeller(tokenID){
+            marketData = contractMarket.methods.getLowestPriceAndSeller(tokenID)  // (token-id)
+            .call({from:ethereum.selectedAddress, gas:5728712})
+            .then(function (result) {
+                console.log("getPrice transaction details");
+                console.log(result[0]);
+                ltp = result[0];
+                ltpAddr = result[1];
+                //$('#price1').html(ltp)
+                //$('#owner1').html(ltpAddr.substring(0,5)+"....."+ltpAddr.substring(ltpAddr.length-3,ltpAddr.length))
+                return result
+            });
+            return marketData;
+        }
+
+
+        // Function to be called on button click
+        async function buyCallToSC(tokenID, ltp, ltpAddr) {
+
+            console.log("placing Buy order");
+            console.log(ltp);
+            console.log(ltpAddr);
+
+            //TODO:
+            ////////////////////////  Smart Contract Call (place buy order on SC)
+            contractMarket.methods.buyTokenFromMarket(tokenID, ltpAddr)  // (token-id)
+            .send({from:ethereum.selectedAddress, gas:5728712, value: ltp})
+            .then(function (result) {
+                console.log("buy transaction details");
+                console.log(result);
+            });
+        }
+
+        async function approveMarket() {
+            contractToken.methods.setApprovalForMarketPlace()  // (initial supply, price per token)
+            .send({from:ethereum.selectedAddress})
+            .then(function (result) {
+                console.log('setting Approval for marketPlace')
+                console.log(result); 
+            });
+        }
+
+
         async function getContentToDisplay() {
 
             /////////////////////////  Custom API Call
 
-            let lastFetch = await fetch(" http://127.0.0.1:5000/viewLastSix/", {
-            //let result = await fetch("https://chain-link-hackathon.herokuapp.com/viewLastSix/", {
+            //let lastFetch = await fetch(" http://127.0.0.1:5000/viewLastSix/", {
+            let lastFetch = await fetch("https://chain-link-hackathon.herokuapp.com/viewLastSix/", {
               method: "POST",
             }).then(res => {
                 console.log("Request complete! response:", res);
@@ -191,49 +246,42 @@
             contentKeys = Object.keys(lastFetch);
             console.log('contentKeys');
             console.log(contentKeys);
-            dataObj = lastFetch[contentKeys[contentKeys.length-1]];
-            console.log(dataObj);
+            var dataObj = null;
+            for (let i = 0; i < 3; i++) {
+                dataObj = lastFetch[contentKeys[contentKeys.length-i-1]];
+                console.log("dobj")
+                console.log(dataObj)
+
+                //TODO Update Market Data
+                marketData = getLowestPriceAndSeller(dataObj["token_id"]);
+                console.log(marketData)
+                console.log(marketData[0])
+                console.log(marketData[1])
 
 
-            //TODO:
-            ////////////////////////  Smart Contract Call (fetch LTP for all top entries)
+                // TODO Link Buy button to smartContract (LowestPrice)
 
-            contractMarket.methods.getLowestPriceAndSeller(23)  // (token-id)
-            .call({from:ethereum.selectedAddress, gas:5728712})
-            .then(function (result) {
-                console.log("getPrice transaction details");
-                console.log(result[0]);
-                ltp = result[0];
-                ltpAddr = result[1];
-                $('#price1').html(ltp)
-                $('#owner1').html(ltpAddr.substring(0,5)+"....."+ltpAddr.substring(ltpAddr.length-3,ltpAddr.length))
-            });
+                // TODO Link Sell button to smartContract
+
+                // TODO Add alerts for all transaction-updates
+
+
+                // TODO-ADV Make table dynamically populated if possible 
+
+                // TODO-ADV If no seeller --> Show owner-price and link accordingly 
+
+            }
+            
             ////////////////////////////////////////////////////////////////////////////////////////////////
             
         }
 
 
-        // Function to be called on button click
-        async function buyCallToSC(tokenID, ltp, ltpAddr) {
-
-            console.log("placing Buy order");
-            console.log(ltp);
-            console.log(ltpAddr);
-
-            //TODO:
-            ////////////////////////  Smart Contract Call (place buy order on SC)
-            contractMarket.methods.buyTokenFromMarket(23, ltpAddr)  // (token-id)
-            .send({from:ethereum.selectedAddress, gas:5728712, value: ltp})
-            .then(function (result) {
-                console.log("buy transaction details");
-                console.log(result);
-            });
-        }
 
     </script>
     <script>  
 
-        $('#price1').html('--- ETH')
+        $('#price1').html('---')
              
         $( document ).ready(function() {
             m = detectMetaMask()
