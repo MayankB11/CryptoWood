@@ -63,5 +63,9 @@ print("Contract Content Token Deployed At:", tx_receipt['contractAddress'])
 
 address_contract_CT = tx_receipt['contractAddress']
 
+
+
 # now create a transaction to set content token address to chain link contract
 # by calling the setContractAddress(_address) function
+
+

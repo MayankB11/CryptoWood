@@ -66,7 +66,7 @@
 
                         <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
+                        <button id="s1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
                     </span>
                 </div>
 
@@ -81,7 +81,7 @@
 
                         <button id="b2" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
+                        <button id="s2" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
                     </span>
                 </div>
 
@@ -96,7 +96,7 @@
 
                         <button id="b3" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <button id="b1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
+                        <button id="s3" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
                     </span>
                 </div>
 
@@ -185,115 +185,66 @@
 
         }
 
-        async function postContent() {
+        
+        async function getContentToDisplay() {
 
-
-/*
-            console.log("transaction code started from: "+currentAccount)
-
-            //const util = require('ethereumjs-util'); 
-            //var hex = util.bufferToHex(util.setLengthLeft(input_value, 32));
-
-            //var hex = '0x' + sprintf('%064d', input_value*1000000000);
-
-            const transactionParameters = {
-                  //nonce: '0x00', // ignored by MetaMask
-                  //gasPrice: '0x09184e72a000', // customizable by user during MetaMask confirmation.
-                  //gas: '0x21000', // customizable by user during MetaMask confirmation.
-                  to: '0xc343138090D621aF736C7f6b2183eF475C4ABd20', // Required except during contract publications. (taken from metamask acc2)
-                  from: ethereum.selectedAddress, // must match user's active address.
-                  //value: '0x100000000000', // Only required to send ether to the recipient from the initiating external account.
-                  value: trx_value.toString(16),
-                  //data:input_value, // Optional, but used for defining smart contract creation and interaction.
-                  //chainId: '0x3', // Used to prevent transaction reuse across blockchains. Auto-filled by MetaMask.
-              };
-/*
-            const txHash = await ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [transactionParameters],
-            })
-            .then((result) => {
-                console.log(result);
-                // The result varies by RPC method.
-                // For example, this method will return a transaction hash hexadecimal string on success.
-            })
-            .catch((error) => {
-                // If the request fails, the Promise will reject with an error.
-            });;
-
-            console.log('transaction code finished')
-*/
-            ////////////////////////////////////////////////////////////////////
-
-
-            /////////////////////////  Custom API Call
-
-            title_value = $('#titleValue').val()
-            link_value = $('#linkValue').val()
-            num_token_value = $('#numTokenValue').val()
-
-            let data = {
-                url: link_value,
-                title: title_value,
-                owner_address: currentAccount,
-                num_tokens: num_token_value
-            }
-
-            let result = await fetch("http://127.0.0.1:5000/storeDetails/", {
+           let lastFetch = await fetch(" http://127.0.0.1:5000/viewLastSix/", {
+            //let result = await fetch("https://chain-link-hackathon.herokuapp.com/viewLastSix/", {
               method: "POST",
-              // headers: {
-              //       'accept': 'application/json',
-              //       'Content-Type': 'application/json',
-              //   },
-              body: JSON.stringify(data)
             }).then(res => {
-              console.log("Request complete! response:", res);
-              private_link_id = res.text();
-              return private_link_id
-            });
-            console.log(result);
-
-
-            //////////////////////////////////////////////////////////////
-
-
-            ////////////////////////  Smart Contract Call
-
-            contractToken.methods.addNewToken(10, 100000000000)  // (initial supply, price per token)
-            .send({from:ethereum.selectedAddress})
-            .then(function (result) {
-                console.log(result);
-                getValue()
+                console.log("Request complete! response:", res);
+                let jsonObj= res.text().then(function(text){
+                    return JSON.parse(text);
+                });
+                //console.log('jsonObj');
+                //console.log(jsonObj);
+                return jsonObj;
+                
             });
 
-            //////////////////////////////////////////////////////////////
-
-
-/*
-            contractMarket.methods.setContentTokenAddress(contractTokenAddress)
-            .send({from:ethereum.selectedAddress})
-            .then(function (result) {
-                console.log(result);
-                //$('#getValue').html(input_value)
-            });
-*/
+            console.log('lastFetch');
+            console.log(lastFetch);
             
 
+            //TODO: 
+            ///////////////////////////////  Make array/list of the top entries returned by Custom API
+            contentKeys = Object.keys(lastFetch);
+            console.log('contentKeys');
+            console.log(contentKeys);
+            var dataObj = null;
+            for (let i = 0; i < 3; i++) {
+                dataObj = lastFetch[contentKeys[contentKeys.length-i-1]];
+                console.log("dobj")
+                console.log(dataObj)
+                thumbID = i+1;
+                thumbID = 'c'+thumbID;
+                console.log(thumbID)
+                console.log(document.getElementById( thumbID ).src);
+                console.log(dataObj["thumbnail"])
+                document.getElementById( thumbID ).src = dataObj["thumbnail"];
+                console.log(document.getElementById( thumbID ).src);
+            }
+            
+            //console.log(dataArr);
+
+
+
+            // Extract url
+
+            // Extract thumbnail
+
+
+            //TODO:
+            ////////////////////////  Smart Contract Call (Buy/Sell requests)
+
+      
+            ////////////////////////////////////////////////////////////////////////////////////////////////
+            
         }
+
     </script>
     <script>   
-        $.getJSON("build/contracts/ContentToken.json", function(result) {            
-                abiToken = result.abi 
-                console.log('abiToken')
-                console.log(abiToken)               
-            });
 
-        $.getJSON("build/contracts/MarketPlace.json", function(result) {            
-                abiMarket = result.abi 
-                console.log('abiMarket')
-                console.log(abiMarket)               
-            });
-             
         $( document ).ready(function() {
             m = detectMetaMask()
             if(m) {
@@ -315,11 +266,26 @@
                 postContent()
             });
 
-            try {            
+            try {       
+                console.log("setting up contract object")     
                 web3 = new Web3(window.ethereum);
+
+                // Token Contract
+                $.getJSON("build/contracts/ContentToken.json", function(result) {            
+                    abiToken = result.abi;  
+                    contractToken = new web3.eth.Contract(abiToken, contractTokenAddress);      
+                    });
+
+                // MarketPlace Contract
+                $.getJSON("build/contracts/MarketPlace.json", function(result) {            
+                    abiMarket = result.abi;
+                    contractMarket = new web3.eth.Contract(abiMarket, contractMarketAddress);        
+                    });
             } catch (error) {
                 alert(error)
-            }            
+            }     
+
+            getContentToDisplay();       
             
         })
     </script>  

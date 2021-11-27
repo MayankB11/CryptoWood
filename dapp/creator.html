@@ -85,6 +85,13 @@
         let contractTokenAddress = '0x5dd1c19004AC5D61A469EfcE3066E65ae91B5563'
         let contractMarketAddress = '0x0D909816bA4A4b70155eD8bb7e4D7f459370aF88'
         let private_link_id = null;
+
+        var contractToken=null;
+        var contractMarket=null;
+
+        var abiToken=null;
+        var abiMarket=null;
+        var message=null;
         
         function handleAccountsChanged(accounts) {
             console.log('Calling HandleChanged')
@@ -133,13 +140,7 @@
 
         async function getValue() {
             console.log('GetValue')
-            const contractToken = new web3.eth.Contract(
-                        abiToken,
-                        contractTokenAddress
-            );
-            console.log('abiToken')
-            console.log(abiToken) 
-
+            
             contractToken.methods.getTokenPriceAndCreator(1).call().then(function (result) {       
                 console.log('TokenPriceResult')
                 console.log(result)         
@@ -246,7 +247,7 @@
             }
 
             let result = await fetch("http://127.0.0.1:5000/storeDetails/", {
-            //let result = await fetch("https://chain-link-hackathon.herokuapp.com/storeDetails", {
+            //let result = await fetch("https://chain-link-hackathon.herokuapp.com/storeDetails/", {
               method: "POST",
               // headers: {
               //       'accept': 'application/json',
@@ -268,16 +269,6 @@
 
             ////////////////////////  Smart Contract Call
 
-            const contractToken = new web3.eth.Contract(
-                        abiToken,
-                        contractTokenAddress
-            );
-
-            const contractMarket = new web3.eth.Contract(
-                        abiMarket,
-                        contractMarketAddress
-            );
-
             // Mint 100 tokens for the creator
             contractToken.methods.addNewToken(num_token_value, price_token_value, parseInt(result))  // (initial supply, price per token, private-link-id)
             .send({from:ethereum.selectedAddress, gas: 5728712})
@@ -289,21 +280,21 @@
                 contractToken.methods.addNewToken(0,0,0)
                 .call({from:ethereum.selectedAddress, gas: 5728712}) 
                 .then(function (result) {
-                    tokenID = result;
+                    tokenID = result-1;
                     console.log('tokenID')
                     console.log(tokenID);
 
+                    message = "Congratulations!!! "+num_token_value+" NFTs have been minted for : "+title_value + " || TokenID = "+tokenID;
+                    alert(message);  // display string message
+
                     // TODO: Automatically set sell price "55555"
-                    contractMarket.methods.sellToken(tokenID, 55555)
+                    contractMarket.methods.sellToken(tokenID, price_token_value)
                     .send({from:ethereum.selectedAddress, gas: 5728712}) 
                     .then(function (result) {
                         console.log('transaction details - sellToken')
                         console.log(result);
                     });
-                });
-                
-
-                
+                });  
             });
 
             
@@ -316,18 +307,6 @@
     </script>
     <script>   
 
-        $.getJSON("build/contracts/ContentToken.json", function(result) {            
-                abiToken = result.abi 
-                console.log('abiToken')
-                console.log(abiToken)               
-            });
-
-        $.getJSON("build/contracts/MarketPlace.json", function(result) {            
-                abiMarket = result.abi 
-                console.log('abiMarket')
-                console.log(abiMarket)               
-            });
-             
         $( document ).ready(function() {
             m = detectMetaMask()
             if(m) {
@@ -353,8 +332,21 @@
                 connectContract()
             });
 
-            try {            
+            try {       
+                console.log("setting up contract object")     
                 web3 = new Web3(window.ethereum);
+
+                // Token Contract
+                $.getJSON("build/contracts/ContentToken.json", function(result) {            
+                    abiToken = result.abi;  
+                    contractToken = new web3.eth.Contract(abiToken, contractTokenAddress);      
+                    });
+
+                // MarketPlace Contract
+                $.getJSON("build/contracts/MarketPlace.json", function(result) {            
+                    abiMarket = result.abi;
+                    contractMarket = new web3.eth.Contract(abiMarket, contractMarketAddress);        
+                    });
             } catch (error) {
                 alert(error)
             }            
