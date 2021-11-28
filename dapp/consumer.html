@@ -160,7 +160,7 @@
             }
         }
 
-        function setThumbnail(thumbID, thumbnailLink){
+        async function setThumbnail(thumbID, thumbnailLink){
             console.log(thumbID)
             console.log(document.getElementById( thumbID ).src);
             console.log(thumbnailLink)
@@ -177,35 +177,27 @@
                 console.log('Finished buyFromCreator for tokenID: '+tokenID);
                 console.log(result); 
 
-            });
-        }
+                // TODO add alert message if successful!!
 
-        async function getValue() {
-            console.log('GetValue')
-            const contractToken = new web3.eth.Contract(
-                        abiToken,
-                        contractTokenAddress
-            );
-            console.log('abiToken')
-            console.log(abiToken) 
-
-            contractToken.methods.getTokenPriceAndCreator(1).call().then(function (result) {       
-                console.log('TokenPriceResult')
-                console.log(result)         
-                //$('#getValue').html(result)
-            });
-
-
-            console.log('getValue- Exit')
-
-            contractToken.methods.owner().call().then(function (result) {       
-                console.log('resultOwner')
-                console.log(result)         
-                //$('#getValue').html(result)
             });
 
         }
 
+
+        // TODO complete similar to above function
+        async function SellOnMarketplace(tokenID, price){
+            console.log('tokenID');
+            console.log(tokenID)
+            contractMarket.methods.sellToken(tokenID, price)  // (initial supply, price per token)
+            .send({from:ethereum.selectedAddress})
+            .then(function (result) {
+                console.log('Finished SellOnMarketplace for tokenID: '+tokenID);
+                console.log(result); 
+
+                // TODO add alert message if successful!!
+
+            });
+        }
         
         async function getContentToDisplay() {
 
@@ -247,15 +239,20 @@
                 //TODO Link Watch Button to re-direct to mintgate address
 
                 //TODO Link Sell button to smart-contract
+                sellID = 's'+i
+                document.getElementById(sellID).onclick = function(){
+                    
+                    sellPrice = 1; // TODO Ask user for text input using prompt!
+                    SellOnMarketplace(parseInt(dataObj["token_id"]), sellPrice);
+                };
 
                 // Linked Buy button to smart-contract
                 buyID = 'b'+i
                 document.getElementById(buyID).onclick = function(){
-                    buyFromCreator(parseInt(dataObj["token_id"]), parseInt(dataObj["price"]))
+                    buyFromCreator(parseInt(dataObj["token_id"]), parseInt(dataObj["price"]));
                 };
 
                 //TODO Add alerts for all transaction-updates
-
 
 
                 //TODO-ADV Unhide Sell button if user has token (check using balanceOf)

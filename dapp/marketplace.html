@@ -185,10 +185,14 @@
                 ltp = result[0];
                 ltpAddr = result[1];
                 //$('#price1').html(ltp)
-                //$('#owner1').html(ltpAddr.substring(0,5)+"....."+ltpAddr.substring(ltpAddr.length-3,ltpAddr.length))
+                //$('#owner1').html()
                 return result
             });
             return marketData;
+        }
+
+        function miniAddress(address){
+            return address.substring(0,5)+"....."+address.substring(address.length-3,address.length)
         }
 
 
@@ -206,15 +210,18 @@
             .then(function (result) {
                 console.log("buy transaction details");
                 console.log(result);
+
+                alert("Successfully Bought Token-"+tokenID+" from "+miniAddress(ltpAddr)+" for "+ltp+ "WETH")
             });
         }
 
         async function approveMarket() {
-            contractToken.methods.setApprovalForMarketPlace()  // (initial supply, price per token)
+            contractToken.methods.setApprovalForMarketPlace() 
             .send({from:ethereum.selectedAddress})
             .then(function (result) {
                 console.log('setting Approval for marketPlace')
                 console.log(result); 
+            // TODO Add marketplace approved alert message
             });
         }
 
@@ -262,6 +269,8 @@
                 // TODO Link Buy button to smartContract (LowestPrice)
 
                 // TODO Link Sell button to smartContract
+
+                // TODO Ask for sellPrice using prompt
 
                 // TODO Add alerts for all transaction-updates
 
