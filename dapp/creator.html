@@ -259,7 +259,7 @@
             });
 
             try {       
-                console.log("setting up contract object")     
+                console.log("setting up contracts")     
                 web3 = new Web3(window.ethereum);
 
                 // Token Contract
@@ -279,6 +279,8 @@
                     abiLink = result.abi;
                     contractLink = new web3.eth.Contract(abiLink, contractLinkAddress);        
                     });
+
+                console.log("all contracts configured")
 
             } catch (error) {
                 alert(error)

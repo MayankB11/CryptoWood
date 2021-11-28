@@ -61,7 +61,7 @@
                     <span>
                         <h7 id="t1">CONTENT 1</h7>
 
-                        <img id="c1" class="meta-normal" width="250" height="150" src="https://www.youtube.com/watch?v=JgTB6pSogc0">
+                        <img id="c1" class="meta-normal" width="250" height="150" src="https://thumbs.dreamstime.com/z/circle-loader-wait-load-spinning-preloader-website-template-interface-buffering-waiting-gif-upload-download-uploading-indicator-185770019.jpg">
 
                         <button id="w1" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
 
@@ -76,7 +76,7 @@
                     <span>
                         <h7 id="t2">CONTENT 2</h7>
 
-                        <img id="c2" class="meta-normal" width="250" height="150" src="https://i.ytimg.com/an_webp/I7ynijcZl7Q/mqdefault_6s.webp?du=3000&sqp=CJCY7owG&rs=AOn4CLD2RQ6BQ5WtkyXTtAWkdSD1FpGo5Q">
+                        <img id="c2" class="meta-normal" width="250" height="150" src="https://thumbs.dreamstime.com/z/circle-loader-wait-load-spinning-preloader-website-template-interface-buffering-waiting-gif-upload-download-uploading-indicator-185770019.jpg">
 
                         <button id="w2" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
 
@@ -91,7 +91,7 @@
                     <span>
                         <h7 id="t3">CONTENT 3</h7>
 
-                        <img id="c3" class="meta-normal" width="250" height="150" src="https://i.ytimg.com/an_webp/I7ynijcZl7Q/mqdefault_6s.webp?du=3000&sqp=CJCY7owG&rs=AOn4CLD2RQ6BQ5WtkyXTtAWkdSD1FpGo5Q">
+                        <img id="c3" class="meta-normal" width="250" height="150" src="https://thumbs.dreamstime.com/z/circle-loader-wait-load-spinning-preloader-website-template-interface-buffering-waiting-gif-upload-download-uploading-indicator-185770019.jpg">
 
                         <button id="w3" style="margin-top: 10px;" class="btn btn-primary">Watch</button>
 
@@ -229,39 +229,66 @@
             contentKeys = Object.keys(lastFetch);
             console.log('contentKeys');
             console.log(contentKeys);
+
+            valid = [];
+            for (let i = 0; i < contentKeys.length; i++) {
+                if(lastFetch[contentKeys[i]]["id"] != null){
+                    valid.push(i);
+                }
+            }
+
+            console.log(valid);
+
             var dataObj = null;
-            for (let i = 1; i < 4; i++) {
-                dataObj = lastFetch[contentKeys[contentKeys.length-i]];
+            var count = 0;
+            for (let i = contentKeys.length; i > 0 ; i--) {
+                if(!valid.includes(i)){
+                    continue;
+                }
+                else{
+                    count+=1;
+                }
+                dataObj = lastFetch[contentKeys[i]];
                 console.log("dobj")
                 console.log(dataObj)
 
                 // Update thumbnail
-                thumbID = 'c'+i;
+                thumbID = 'c'+count;
                 setThumbnail(thumbID, dataObj["thumbnail"]);
 
                 //TODO Update Title
-                titleID = 't'+i;
+                titleID = 't'+count;
                 setTitle(titleID, dataObj["title"]);
                 
                 //TODO Link Watch Button to re-direct to mintgate address
-                document.getElementById('w'+i).onclick = function () {
-                    location.href = "https://mgate.io/go/" + dataObj["id"];
-                }
+                watchID = 'w'+count;
+                document.getElementById(watchID).onclick = function () {
+                    console.log("Watch prompt!!")
+                    prompt("prompt!", "yes");
+                    alert("alert!");
+                    if (confirm("You will now be redirected to mintgate") == true) {
+                        location.href = "https://mgate.io/go/" + dataObj["id"];
+                    }  
+                };
                 //TODO Link Sell button to smart-contract
-                sellID = 's'+i
+                sellID = 's'+count
                 document.getElementById(sellID).onclick = function(){
-                    sellPrice = 1; // TODO Ask user for text input using prompt!
-                    sellPrice = prompt("Enter sell price : ");
-                    SellOnMarketplace(parseInt(dataObj["token_id"]), parseInt(sellPrice));
+                    sellPrice = prompt("Enter sell price : ", "0");
+                    if (confirm("Placing Sell order for "+sellPrice+" WETH") == true) {
+                        SellOnMarketplace(parseInt(dataObj["token_id"]), parseInt(sellPrice));
+                    }
                 };
 
                 // Linked Buy button to smart-contract
-                buyID = 'b'+i
+                buyID = 'b'+count
                 document.getElementById(buyID).onclick = function(){
-                    buyFromCreator(parseInt(dataObj["token_id"]), parseInt(dataObj["price"]));
+                    if (confirm("You will charged "+ parseInt(dataObj["price"])+" WETH for this transaction!") == true) {
+                        buyFromCreator(parseInt(dataObj["token_id"]), parseInt(dataObj["price"]));    
+                    }
+                    
                 };
 
-                //TODO Add alerts for all transaction-updates
+                console.log("mapped all btns to functions!")
 
 
                 //TODO-ADV Unhide Sell button if user has token (check using balanceOf)
