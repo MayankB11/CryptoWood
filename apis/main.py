@@ -97,7 +97,7 @@ def createGatedAccess():
 						"token": "0xA8337c9EdBeF1885cf6Dee4C4951e60cB93C426F",
 						"ttype": "1155",
 						"balance": 1,
-						"network": 45,
+						"network": 42,
 						"subid": token_id
 					}
 					],
