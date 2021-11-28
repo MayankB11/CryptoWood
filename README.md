@@ -19,18 +19,18 @@ It was inspired by the fact that tokens can be used to access content and have d
 ## What it does
 It provides an NFT based streaming service to upload/watch content and a market place for buy and sell of their access tokens.
 
-## How I built it
+## How we built it
 We built it with Solidity, ChainLink, Heroku and Firebase. Frontend was built with basic HTML, CSS and Javascript. 
 
-## Challenges I ran into
+## Challenges we ran into
 - Using Chainlink to get off-chain data to on-chain
 - Creating a market place
 
-## Accomplishments that I'm proud of
+## Accomplishments that we are proud of
 It's working!!! It is secured by blockchain with transparent and non-changeable code. 
 
-## What I learned
-Solidity, Chainlink, Firebase
+## What we learned
+Solidity, Chainlink, Heroku, Firebase
 
 ## What's next for CryptoWood
 Get feedback from users to improve.
