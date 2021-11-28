@@ -177,11 +177,26 @@
                 console.log('Finished buyFromCreator for tokenID: '+tokenID);
                 console.log(result); 
 
-                // TODO add alert message!!
+                // TODO add alert message if successful!!
 
             });
 
+        }
 
+
+        // TODO complete similar to above function
+        async function SellOnMarketplace(tokenID, price){
+            console.log('tokenID');
+            console.log(tokenID)
+            contractMarket.methods.sellToken(tokenID, price)  // (initial supply, price per token)
+            .send({from:ethereum.selectedAddress})
+            .then(function (result) {
+                console.log('Finished SellOnMarketplace for tokenID: '+tokenID);
+                console.log(result); 
+
+                // TODO add alert message if successful!!
+
+            });
         }
         
         async function getContentToDisplay() {
@@ -224,11 +239,17 @@
                 //TODO Link Watch Button to re-direct to mintgate address
 
                 //TODO Link Sell button to smart-contract
+                sellID = 's'+i
+                document.getElementById(sellID).onclick = function(){
+                    
+                    sellPrice = 1; // TODO Ask user for text input using prompt!
+                    SellOnMarketplace(parseInt(dataObj["token_id"]), sellPrice);
+                };
 
                 // Linked Buy button to smart-contract
                 buyID = 'b'+i
                 document.getElementById(buyID).onclick = function(){
-                    buyFromCreator(parseInt(dataObj["token_id"]), parseInt(dataObj["price"]))
+                    buyFromCreator(parseInt(dataObj["token_id"]), parseInt(dataObj["price"]));
                 };
 
                 //TODO Add alerts for all transaction-updates
