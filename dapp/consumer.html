@@ -59,7 +59,7 @@
                 <div class="col-md-2 offset-2" style="margin-top: 40px;">
                     
                     <span>
-                        <h7>CONTENT 1</h7>
+                        <h7 id="t1">CONTENT 1</h7>
 
                         <img id="c1" class="meta-normal" width="250" height="150" src="https://www.youtube.com/watch?v=JgTB6pSogc0">
 
@@ -67,14 +67,14 @@
 
                         <button id="b1" onclick="" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <!-- <button id="s1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>   -->
+                        <button id="s1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
                     </span>
                 </div>
 
                 <div class="col-md-2" style="margin-top: 40px; margin-left: 120px;">
                     
                     <span>
-                        <h7>CONTENT 2</h7>
+                        <h7 id="t2">CONTENT 2</h7>
 
                         <img id="c2" class="meta-normal" width="250" height="150" src="https://i.ytimg.com/an_webp/I7ynijcZl7Q/mqdefault_6s.webp?du=3000&sqp=CJCY7owG&rs=AOn4CLD2RQ6BQ5WtkyXTtAWkdSD1FpGo5Q">
 
@@ -82,14 +82,14 @@
 
                         <button id="b2" onclick="" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <!-- <button id="s2" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>   -->
+                        <button id="s2" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
                     </span>
                 </div>
 
                 <div class="col-md-2" style="margin-top: 40px; margin-left: 120px;">
                     
                     <span>
-                        <h7>CONTENT 3</h7>
+                        <h7 id="t3">CONTENT 3</h7>
 
                         <img id="c3" class="meta-normal" width="250" height="150" src="https://i.ytimg.com/an_webp/I7ynijcZl7Q/mqdefault_6s.webp?du=3000&sqp=CJCY7owG&rs=AOn4CLD2RQ6BQ5WtkyXTtAWkdSD1FpGo5Q">
 
@@ -97,7 +97,7 @@
 
                         <button id="b3" onclick="" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <!-- <button id="s3" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>   -->
+                        <button id="s3" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
                     </span>
                 </div>
 
@@ -167,6 +167,11 @@
             document.getElementById( thumbID ).src = thumbnailLink;
             console.log(document.getElementById( thumbID ).src);
         }
+        
+        async function setTitle(titleID, title){
+            var contentTile = document.getElementById(titleID);
+            contentTile.innerHTML = title;
+        }
 
         async function buyFromCreator(tokenID, price){
             console.log('tokenID');
@@ -178,7 +183,7 @@
                 console.log(result); 
 
                 // TODO add alert message if successful!!
-
+                alert("Buy successful!");
             });
 
         }
@@ -195,7 +200,7 @@
                 console.log(result); 
 
                 // TODO add alert message if successful!!
-
+                alert("Sell successful!");
             });
         }
         
@@ -235,15 +240,19 @@
                 setThumbnail(thumbID, dataObj["thumbnail"]);
 
                 //TODO Update Title
-
+                titleID = 't'+i;
+                setTitle(titleID, dataObj["title"]);
+                
                 //TODO Link Watch Button to re-direct to mintgate address
-
+                document.getElementById('w'+i).onclick = function () {
+                    location.href = "https://mgate.io/go/" + dataObj["id"];
+                }
                 //TODO Link Sell button to smart-contract
                 sellID = 's'+i
                 document.getElementById(sellID).onclick = function(){
-                    
                     sellPrice = 1; // TODO Ask user for text input using prompt!
-                    SellOnMarketplace(parseInt(dataObj["token_id"]), sellPrice);
+                    sellPrice = prompt("Enter sell price : ");
+                    SellOnMarketplace(parseInt(dataObj["token_id"]), parseInt(sellPrice));
                 };
 
                 // Linked Buy button to smart-contract
