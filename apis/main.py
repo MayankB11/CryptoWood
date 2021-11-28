@@ -50,12 +50,13 @@ def storeDetails():
 	if "url" in data and "title" in data and "owner_address" in data and "num_tokens" in data \
 		and "price" in data and "thumbnail" in data:
 		url = data["url"]
-		private_link_id = uuid.uuid1().hex
+		# private_link_id = uuid.uuid1().hex
 		title = data["title"]
 		owner_address = data["owner_address"]
 		num_tokens = data["num_tokens"]
 		price = data["price"]
 		thumbnail = data["thumbnail"]
+		private_link_id = str(int(time.time()))
 		post_data = {
 			"private_link_id" :private_link_id, 
 			"title" : title,
@@ -72,12 +73,12 @@ def storeDetails():
 	else:
 		return "Either of the field(s) is/are empty in the request",400
 
-@app.route('/createGatedAccess/', methods=['POST'])
+@app.route('/createGatedAccess/', methods=['GET'])
 def createGatedAccess():
 	data = request.get_json()
-	if "token_id" in data and "private_link_id" in data:
-		token_id = data["token_id"]
-		private_link_id = data["private_link_id"]
+	token_id = request.args.get('tokenId')
+	private_link_id = request.args.get('privateLinkId')
+	if token_id !="" and private_link_id !="":
 		storedData = ref.get()
 		for key, value in storedData.items():
 			if(value["private_link_id"] == private_link_id):
@@ -111,6 +112,7 @@ def createGatedAccess():
 				print("Mintgate Response : ", response.text)
 				id = response.json()["id"]
 				ref.child(key).update({"id":id})
+				ref.child(key).update({"token_id":token_id})
 				return id
 		return "Either access to db failed or private_link_id not found on DB",400
 	else:
@@ -121,6 +123,11 @@ def viewLastSix():
 	
 	storedData = ref.order_by_child("epoch").limit_to_last(6).get()
 	return storedData
+
+@app.route('/clearDb/', methods=['POST'])
+def clearDb():
+	ref.set({})
+	return ""
 
 # class HelloWorld(Resource):
 #     def get(self):
