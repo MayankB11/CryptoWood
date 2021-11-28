@@ -261,7 +261,8 @@
                 setTitle(titleID, dataObj["title"]);
                 
                 //TODO Link Watch Button to re-direct to mintgate address
-                document.getElementById('w'+count).onclick = function () {
+                watchID = 'w'+count;
+                document.getElementById(watchID).onclick = function () {
                     console.log("Watch prompt!!")
                     prompt("prompt!", "yes");
                     alert("alert!");
