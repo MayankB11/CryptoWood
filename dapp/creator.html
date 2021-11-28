@@ -82,9 +82,9 @@
         let currentAccount = null;
         let web3;
         let abi;
-        let contractTokenAddress = '0x981176534e3eE3fF476a5e21EaD4D6f15a137164'
-        let contractMarketAddress = '0x4016814d7Fa4b2f6da0a699B409Df39f928F4bB1'
-        let contractLinkAddress = '0xB1F6E1C4C85a124ac2F19c7a3f87dc55Ee748A3d'
+        let contractTokenAddress = '0xa9b11D60CA86FE6Eb5066435EB513D10De5C487a'
+        let contractMarketAddress = '0x1658a3BE65c875F692904ea343B70Ba511EE16b7'
+        let contractLinkAddress = '0x3Ba9dB7F15baB5d4b7996F3AFbF161cF760f1823'
         let private_link_id = null;
 
         var contractToken=null;
@@ -142,19 +142,19 @@
 
         async function connectContract() {
 
-            // contractMarket.methods.setContentTokenAddress(contractTokenAddress)  // (initial supply, price per token)
-            // .send({from:ethereum.selectedAddress})
-            // .then(function (result) {
-            //     console.log("contract-linking MarketPlace and ContentToken")
-            //     console.log(result);
-            // });
+            contractMarket.methods.setContentTokenAddress(contractTokenAddress)  // (initial supply, price per token)
+            .send({from:ethereum.selectedAddress})
+            .then(function (result) {
+                console.log("contract-linking MarketPlace and ContentToken")
+                console.log(result);
+            });
 
-            // contractToken.methods.setApprovalForMarketPlace()  
-            // .send({from:ethereum.selectedAddress})
-            // .then(function (result) {
-            //     console.log('setting Approval for marketPlace')
-            //     console.log(result); 
-            // });
+            contractToken.methods.setApprovalForMarketPlace()  
+            .send({from:ethereum.selectedAddress})
+            .then(function (result) {
+                console.log('setting Approval for marketPlace')
+                console.log(result); 
+            });
 
             contractLink.methods.setContractAddress(contractTokenAddress) 
             .send({from:ethereum.selectedAddress})
@@ -179,12 +179,11 @@
             let data = {
                 url: content_link_value,
                 title: title_value,
-                owner_address: currentAccount,
+                owner_address: ethereum.selectedAddress,
                 num_tokens: num_token_value,
                 price: price_token_value,
                 thumbnail: thumbnail_link_value,
             }
-
             //let result = await fetch("http://127.0.0.1:5000/storeDetails/", {
             let result = await fetch("https://chain-link-hackathon.herokuapp.com/storeDetails/", {
               method: "POST",
@@ -208,7 +207,7 @@
 
             ////////////////////////  Smart Contract Call
 
-            // Mint 100 tokens for the creator
+            // Mint tokens for the creator
             contractToken.methods.addNewToken(num_token_value, price_token_value, parseInt(result))  // (initial supply, price per token, private-link-id)
             .send({from:ethereum.selectedAddress, gas: 5728712})
             .then(function (result) {
@@ -219,7 +218,7 @@
                 contractToken.methods.addNewToken(0,0,0)
                 .call({from:ethereum.selectedAddress, gas: 5728712}) 
                 .then(function (result) {
-                    tokenID = result-1;
+                    tokenID = result-1; // Not sure why incremented tokenID is returned from addToken function
                     console.log('tokenID')
                     console.log(tokenID);
 
