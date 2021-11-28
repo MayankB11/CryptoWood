@@ -55,14 +55,14 @@
             </div>
 
             <div style="margin-top: 30px;" class="row text-center">
-                <div class="col-md-12 offset-3">
-                    <table style="background-color : #F1F1F1; width: 500px;">
+                <div class="col-md-12 offset-1">
+                    <table style="background-color : #F1F1F1; width: 800px;">
                       <tr>
                         <th>Token ID</th>
                         <th>Cotent Title</th>
                         <th>Lowest Price</th>
                         <th>Buy</th>
-                        <th>My Sell Price</th>
+                        <!-- <th>My Sell Price</th> -->
                         <th>Sell</th>
                       </tr>
                       <tr>
@@ -70,7 +70,7 @@
                         <td id="content1">---</td>
                         <td id="price1" type="text" text="XXX"></td>
                         <td><button id='buy1' class="link">Buy</button></td>
-                        <td><input id="sellPrice3" type="text" value=""></td>
+                        <!-- <td><input id="sellPrice3" type="text" value=""></td> -->
                         <td><button id='sell1' class="link">Sell</button></td>
                         
                       </tr>
@@ -79,7 +79,7 @@
                         <td id="content2">---</td>
                         <td id="price2" >---</td>
                         <td><button id='buy2' class="link">Buy</button></td>
-                        <td><input id="sellPrice3" type="text" value=""></td>
+                        <!-- <td><input id="sellPrice3" type="text" value=""></td> -->
                         <td><button id='sell2' class="link">Sell</button></td>
                         
                       </tr>
@@ -88,7 +88,7 @@
                         <td id="content3">---</td>
                         <td id="price3">---</td>
                         <td><button id='buy3' class="link">Buy</button></td>
-                        <td><input id="sellPrice3" type="text" value=""></td>
+                        <!-- <td><input id="sellPrice3" type="text" value=""></td> -->
                         <td><button id='sell3' class="link">Sell</button></td>
                         
                       </tr>
@@ -257,10 +257,27 @@
             contentKeys = Object.keys(lastFetch);
             console.log('contentKeys');
             console.log(contentKeys);
-            var dataObj = null;
-            for (let i = 1; i < 4; i++) {
+            valid = [];
+            for (let i = 0; i < contentKeys.length; i++) {
+                if(lastFetch[contentKeys[i]]["id"] != null){
+                    valid.push(i);
+                }
+            }
 
-                dataObj = lastFetch[contentKeys[contentKeys.length-i]];
+            console.log(valid);
+
+            var dataObj = null;
+            var count = 0;
+
+            for (let i = contentKeys.length; i > 0 ; i--) {
+                if(!valid.includes(i)){
+                    continue;
+                }
+                else{
+                    count+=1;
+                }
+
+                dataObj = lastFetch[contentKeys[i]];
                 console.log("dobj")
                 console.log(dataObj)
                 tokenID = parseInt(dataObj["token_id"])
@@ -268,52 +285,53 @@
                 console.log(tokenID);
 
 
-
-
                 // Update tokenID 
-                tokenField = 'token'+i
+                tokenField = 'token'+count
                 document.getElementById(tokenField).textContent = tokenID; 
                 console.log("updated tokenField")
                 console.log(document.getElementById(tokenField).textContent);
 
                 // Update contentTitle
-                titleField = 'content'+i
+                titleField = 'content'+count
                 document.getElementById(titleField).textContent = dataObj["title"]; 
                 console.log("updated titleField")
                 console.log(document.getElementById(titleField).textContent);
 
                 //TODO Update Market Data and set up Buy link
-                marketData = getLowestPriceAndSeller(tokenID, dataObj)
+                marketData = await getLowestPriceAndSeller(tokenID, dataObj)
                 .then(res => {
                     console.log("marketData")
                     console.log(res[0]);
                     console.log(res[1]);
 
                     // set LowestPrice 
-                    priceField = 'price'+i
-                    document.getElementById(priceField).textContent = res[0]; 
-                    console.log("updated price")
+                    priceField = 'price'+count
+                    document.getElementById(priceField).textContent = res[0]+" WETH"; 
+                    console.log("updated price for"+count)
                     console.log(document.getElementById(priceField).textContent);
 
                     // set seller and link Buy button
-                    buyBtn = 'buy'+i
+                    buyBtn = 'buy'+count
                     document.getElementById(buyBtn).onclick = function(){
-                        buyFromMarket(tokenID, res[0], res[1]);
+                        if (confirm("You will charged "+ parseInt(res[0])+" WETH for this transaction!") == true) {
+                            buyFromMarket(tokenID, parseInt(res[0]), res[1]);
+                        }
                     };
 
                     return res; 
                 });
 
                 // TODO Link Sell button to smartContract
-                sellField = 'sellPrice'+i
-                sellBtn = 'sell'+i
+                //sellField = 'sellPrice'+count
+                sellBtn = 'sell'+count
                 document.getElementById(sellBtn).onclick = function(){
-                    sellPrice = parseInt(document.getElementById(sellField).value);
-                    SellOnMarketplace(tokenID, sellPrice);
+                    sellPrice = parseInt(prompt("Enter sell price (greater than lowest price) : ", "0"))
+                    if(sellPrice){
+                        if (confirm("Placing Sell order for "+sellPrice+" WETH" )){
+                            SellOnMarketplace(tokenID, sellPrice);
+                        }
+                    }
                 };
-
-                // TODO Ask for sellPrice using prompt -------????
-
 
                 // TODO-ADV Make table dynamically populated if possible 
 
