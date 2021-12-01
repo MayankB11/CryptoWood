@@ -67,7 +67,7 @@
 
                         <button id="b1" onclick="" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <button id="s1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
+                        <!-- <button id="s1" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>   -->
                     </span>
                 </div>
 
@@ -82,7 +82,7 @@
 
                         <button id="b2" onclick="" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <button id="s2" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
+                        <!-- <button id="s2" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>   -->
                     </span>
                 </div>
 
@@ -97,7 +97,7 @@
 
                         <button id="b3" onclick="" style="margin-top: 10px;"class="btn btn-primary">Buy Token</button>
 
-                        <button id="s3" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>  
+                        <!-- <button id="s3" style="margin-top: 10px;"class="btn btn-primary">Sell Token</button>   -->
                     </span>
                 </div>
 
@@ -181,13 +181,10 @@
             .then(function (result) {
                 console.log('Finished buyFromCreator for tokenID: '+tokenID);
                 console.log(result); 
-
-                // TODO add alert message if successful!!
-                alert("Buy successful!");
+                alert("Congratulations!! Successfully Bought Token-"+tokenID+" for "+price+ " WETH");
             });
 
         }
-
 
         // TODO complete similar to above function
         async function SellOnMarketplace(tokenID, price){
@@ -200,10 +197,39 @@
                 console.log(result); 
 
                 // TODO add alert message if successful!!
-                alert("Sell successful!");
+                alert("Congratulations!! Successfully placed sell order for Token-"+tokenID+" for "+price+ " WETH");
             });
         }
         
+        function redirectToLink(link){
+            console.log("redirecting to: ");
+            console.log(link);
+            if (confirm("You will now be redirected to mintgate: "+link) == true) {
+                location.href = link;
+            }  
+        }
+
+        function buildSellOrder(tokenID){
+            console.log("placing sell order for: ");
+            console.log(tokenID);
+            sellPrice = prompt("Enter sell price (in WETH): ", "0");
+            if(sellPrice){
+                if (confirm("Placing Sell order for "+sellPrice+" WETH") == true) {
+                    alert ("We will redirect you to metamask!! Please note that the transaction may take a while!")
+                    SellOnMarketplace(tokenID), parseInt(sellPrice);
+                }
+            }
+        }
+
+        function buildBuyOrder(tokenID, price){
+            console.log("placing buy order for: ");
+            console.log(tokenID);
+            if (confirm("You will charged "+ price+" WETH for this transaction!") == true) {
+                alert ("We will redirect you to metamask!! Please note that the transaction may take a while!")
+                buyFromCreator(tokenID, price);    
+            }
+        }
+
         async function getContentToDisplay() {
 
             //let lastFetch = await fetch(" http://127.0.0.1:5000/viewLastSix/", {
@@ -231,6 +257,7 @@
             console.log(contentKeys);
 
             valid = [];
+            mLink = [];
             for (let i = 0; i < contentKeys.length; i++) {
                 if(lastFetch[contentKeys[i]]["id"] != null){
                     valid.push(i);
@@ -241,7 +268,7 @@
 
             var dataObj = null;
             var count = 0;
-            for (let i = contentKeys.length; i > 0 ; i--) {
+            for (let i = contentKeys.length-1; i >= 0 ; i--) {
                 if(!valid.includes(i)){
                     continue;
                 }
@@ -254,37 +281,32 @@
 
                 // Update thumbnail
                 thumbID = 'c'+count;
-                setThumbnail(thumbID, dataObj["thumbnail"]);
+                await setThumbnail(thumbID, dataObj["thumbnail"]);
 
                 //TODO Update Title
                 titleID = 't'+count;
-                setTitle(titleID, dataObj["title"]);
+                await setTitle(titleID, dataObj["title"]);
                 
                 //TODO Link Watch Button to re-direct to mintgate address
                 watchID = 'w'+count;
+                document.getElementById(watchID).link = "https://mgate.io/go/" + dataObj["id"];
                 document.getElementById(watchID).onclick = function () {
-                    console.log("Watch prompt!!")
-                    prompt("prompt!", "yes");
-                    alert("alert!");
-                    if (confirm("You will now be redirected to mintgate") == true) {
-                        location.href = "https://mgate.io/go/" + dataObj["id"];
-                    }  
+                    redirectToLink(this.link);
                 };
-                //TODO Link Sell button to smart-contract
-                sellID = 's'+count
-                document.getElementById(sellID).onclick = function(){
-                    sellPrice = prompt("Enter sell price : ", "0");
-                    if (confirm("Placing Sell order for "+sellPrice+" WETH") == true) {
-                        SellOnMarketplace(parseInt(dataObj["token_id"]), parseInt(sellPrice));
-                    }
-                };
+
+                // //TODO Link Sell button to smart-contract
+                // sellID = 's'+count
+                // document.getElementById(sellID).tokenID = parseInt(dataObj["token_id"]);
+                // document.getElementById(sellID).onclick = function(){
+                //     buildSellOrder(this.tokenID);
+                // };
 
                 // Linked Buy button to smart-contract
                 buyID = 'b'+count
+                document.getElementById(buyID).tokenID = parseInt(dataObj["token_id"]);
+                document.getElementById(buyID).price = parseInt(dataObj["price"]);
                 document.getElementById(buyID).onclick = function(){
-                    if (confirm("You will charged "+ parseInt(dataObj["price"])+" WETH for this transaction!") == true) {
-                        buyFromCreator(parseInt(dataObj["token_id"]), parseInt(dataObj["price"]));    
-                    }
+                    buildBuyOrder(this.tokenID, this.price)
                     
                 };
 

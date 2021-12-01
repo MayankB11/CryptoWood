@@ -156,28 +156,27 @@
             }
         }
 
-        async function getLowestPriceAndSeller(tokenID, dataObj){
-            console.log("Getting market Data for "+ tokenID)
-            gotMarketData=false;
+        async function getLowestPriceAndSeller(tokenID, priceField, buyBtn){
             marketData = contractMarket.methods.getLowestPriceAndSeller(tokenID)  // (token-id)
             .call({from:ethereum.selectedAddress, gas:5728712})
-            .then(function (result) {
-                console.log("getPrice transaction details");
-                console.log(result[0]);
-                gotMarketData = true;
-                return result
-            });
+            .then(function (res) {
+                console.log("got order details for "+tokenID);
+                console.log(res)
+                console.log(res[0]);
+                console.log(res[1]);
 
-            if(gotMarketData){
-                console.log("returning marketData")
-                console.log(marketData)
-                return marketData;
-            }
-            else{
-                console.log("returning creatorData")
-                return [dataObj["price"], dataObj["owner_address"]]
-            }
-            
+                if(0 < parseInt(res[1])){
+                    // set LowestPrice 
+                    document.getElementById(priceField).textContent = res[0]+" WETH"; 
+                    console.log("updated price for "+tokenID)
+
+                    // set seller and price for Buy button
+                    document.getElementById(buyBtn).price = parseInt(res[0])
+                    document.getElementById(buyBtn).seller = res[1]
+                    document.getElementById(buyBtn).tokenID = tokenID
+                    console.log("updated seller data market")   
+                }  
+            });
         }
 
         function miniAddress(address){
@@ -192,8 +191,7 @@
             console.log(ltp);
             console.log(ltpAddr);
 
-            //TODO:
-            ////////////////////////  Smart Contract Call (place buy order on Market)
+            alert ("We will redirect you to metamask!! Please note that the transaction may take a while!")
             contractMarket.methods.buyTokenFromMarket(tokenID, ltpAddr)  // (token-id)
             .send({from:ethereum.selectedAddress, gas:5728712, value: ltp})
             .then(function (result) {
@@ -225,8 +223,18 @@
                 console.log('setting Approval for marketPlace')
                 console.log(result); 
             // TODO Add marketplace approved alert message
-                alert("MarketPlace has")
+                alert("MarketPlace has been approved to sell your tokens!")
             });
+        }
+
+        function buildSellOrder(tokenID){
+            sellPrice = parseInt(prompt("Enter sell price (greater than lowest price) : ", "0"))
+            if(sellPrice){
+                if (confirm("Placing Sell order for "+sellPrice+" WETH" )){
+                    alert ("We will redirect you to metamask!! Please note that the transaction may take a while!")
+                    SellOnMarketplace(tokenID, sellPrice);
+                }
+            }
         }
 
 
@@ -269,7 +277,7 @@
             var dataObj = null;
             var count = 0;
 
-            for (let i = contentKeys.length; i > 0 ; i--) {
+            for (let i = contentKeys.length-1; i >= 0 ; i--) {
                 if(!valid.includes(i)){
                     continue;
                 }
@@ -297,51 +305,42 @@
                 console.log("updated titleField")
                 console.log(document.getElementById(titleField).textContent);
 
-                //TODO Update Market Data and set up Buy link
-                marketData = await getLowestPriceAndSeller(tokenID, dataObj)
-                .then(res => {
-                    console.log("marketData")
-                    console.log(res[0]);
-                    console.log(res[1]);
+                //TODO Update Market Data 
+                priceField = 'price'+count
+                document.getElementById(priceField).textContent = "0 WETH"; 
 
-                    // set LowestPrice 
-                    priceField = 'price'+count
-                    document.getElementById(priceField).textContent = res[0]+" WETH"; 
-                    console.log("updated price for"+count)
-                    console.log(document.getElementById(priceField).textContent);
-
-                    // set seller and link Buy button
-                    buyBtn = 'buy'+count
-                    document.getElementById(buyBtn).onclick = function(){
-                        if (confirm("You will charged "+ parseInt(res[0])+" WETH for this transaction!") == true) {
-                            buyFromMarket(tokenID, parseInt(res[0]), res[1]);
+                // TODO Set up Buy button attributes
+                buyBtn = 'buy'+count
+                document.getElementById(buyBtn).onclick = function(){
+                    if(this.price > 0){
+                        if (confirm("You will charged "+ this.price+" WETH for this transaction!") == true) {
+                            buyFromMarket(this.tokenID, this.price, this.seller);
                         }
-                    };
+                    }
 
-                    return res; 
-                });
+                    else{
+                        console.log("no sellers in market");
+                        alert("Sorry, we do not have a seller for this NFT yet!");
+                    }
+                };
+
+                getLowestPriceAndSeller(tokenID, priceField, buyBtn)
+                
 
                 // TODO Link Sell button to smartContract
                 //sellField = 'sellPrice'+count
                 sellBtn = 'sell'+count
+                document.getElementById(sellBtn).tokenID = tokenID
                 document.getElementById(sellBtn).onclick = function(){
-                    sellPrice = parseInt(prompt("Enter sell price (greater than lowest price) : ", "0"))
-                    if(sellPrice){
-                        if (confirm("Placing Sell order for "+sellPrice+" WETH" )){
-                            SellOnMarketplace(tokenID, sellPrice);
-                        }
-                    }
+                    buildSellOrder(this.tokenID);
                 };
 
                 // TODO-ADV Make table dynamically populated if possible 
 
             }
             
-            ////////////////////////////////////////////////////////////////////////////////////////////////
-            
+            ////////////////////////////////////////////////////////////////////////////////////////////////   
         }
-
-
 
     </script>
     <script>  
@@ -386,14 +385,7 @@
                 alert(error)
             }            
 
-            $('#buy1').click(function() {
-                buyCallToSC(16, ltp, ltpAddr);
-            });
-
             getContentToDisplay();   
-
-               
-
             
         })
     </script>  
